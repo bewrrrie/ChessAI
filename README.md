@@ -10,13 +10,15 @@ My implementation of ASCII chess game with opponent AI.
 - [ ] Implement opponent AI using minimax criteria ([freecodecamp article](https://www.freecodecamp.org/news/simple-chess-ai-step-by-step-1d55a9266977/), [arXiv:1404.1515](https://arxiv.org/abs/1404.1515), [arXiv:1208.1940](https://arxiv.org/abs/1208.1940))
 
 ### How to build and execute
-To build this project [Haskell Tool Stack](https://github.com/commercialhaskell/stack) is required. 
+To build this project [Haskell Tool Stack](https://github.com/commercialhaskell/stack) is required.  
 ```
+$ cd /path/to/repository/ChessAI
 $ stack build  
-$ stack exec ChessAI
-```
+$ stack exec path/to/generated/executable/ChessAI
+```  
+After executing `$ stack build` path to generated executable file will be shown.
 
-### Hot to play
+### How to play
 First you should choose color that you will be playing for.  
 `Select color ('B'/'W' or 'q' to quit): `  
 You can type any string starting with `b` or `B` to play for Black pieces  
