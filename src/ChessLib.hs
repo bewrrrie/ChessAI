@@ -113,25 +113,25 @@ initialBoard = Board cellsList
         color x y | (x + y) `mod` 2 == 0 = White
                   | otherwise            = Black
 
-        maybePiece 7 7 = Just blackRook
-        maybePiece 0 7 = Just blackRook
-        maybePiece 1 7 = Just blackKnight
-        maybePiece 6 7 = Just blackKnight
-        maybePiece 2 7 = Just blackBishop
-        maybePiece 5 7 = Just blackBishop
-        maybePiece 3 7 = Just blackQueen
-        maybePiece 4 7 = Just blackKing
-        maybePiece _ 6 = Just blackPawn
+        maybePiece 7 0 = Just blackRook
+        maybePiece 0 0 = Just blackRook
+        maybePiece 1 0 = Just blackKnight
+        maybePiece 6 0 = Just blackKnight
+        maybePiece 2 0 = Just blackBishop
+        maybePiece 5 0 = Just blackBishop
+        maybePiece 3 0 = Just blackQueen
+        maybePiece 4 0 = Just blackKing
+        maybePiece _ 1 = Just blackPawn
 
-        maybePiece _ 1 = Just whitePawn
-        maybePiece 4 0 = Just whiteKing
-        maybePiece 3 0 = Just whiteQueen
-        maybePiece 5 0 = Just whiteBishop
-        maybePiece 2 0 = Just whiteBishop
-        maybePiece 6 0 = Just whiteKnight
-        maybePiece 1 0 = Just whiteKnight
-        maybePiece 0 0 = Just whiteRook
-        maybePiece 7 0 = Just whiteRook
+        maybePiece _ 6 = Just whitePawn
+        maybePiece 4 7 = Just whiteKing
+        maybePiece 3 7 = Just whiteQueen
+        maybePiece 5 7 = Just whiteBishop
+        maybePiece 2 7 = Just whiteBishop
+        maybePiece 6 7 = Just whiteKnight
+        maybePiece 1 7 = Just whiteKnight
+        maybePiece 0 7 = Just whiteRook
+        maybePiece 7 7 = Just whiteRook
 
         maybePiece _ _ = Nothing
 
