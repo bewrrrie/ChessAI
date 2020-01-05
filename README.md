@@ -69,7 +69,7 @@ For example: `e2e4`. This will affect on game board in such way.
 
 Move for Black.
 ```  
-Now it says that current move is for Black. Or instead of move (`e2e4`) you could typ any string starting with `q` or `Q` to quit the game.   
+Now it says that current move is for Black. Instead of move (`e2e4`) you could type any string starting with `q` or `Q` to quit the game.   
 
 ### Save game history to file
 To be done soon...
