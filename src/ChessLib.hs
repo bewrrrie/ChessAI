@@ -52,8 +52,8 @@ instance Show Board where
           showLetterCoordinates (row:rows)   = " " ++ concatMap (\ x -> " " ++ [x]) ['A' .. 'H'] ++ "\n"
 
 -- Chess game state type
-data State = Move  Color | Draw Color
-           | Check Color | Mate Color
+data State = Move  Color | Check Color
+           | Mate Color  | Draw
            | CheckMate Color deriving (Eq, Show)
 data Game = Game { gameBoard :: Board
                  , gameState :: State
