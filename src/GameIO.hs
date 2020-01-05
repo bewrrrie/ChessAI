@@ -1,6 +1,6 @@
 module GameIO where
 
-import Game
+import ChessLib
 
 -- Play game function
 playChess :: IO ()

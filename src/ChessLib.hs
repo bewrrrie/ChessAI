@@ -1,4 +1,4 @@
-module Game where
+module ChessLib where
 
 import Data.Maybe (isNothing)
 
