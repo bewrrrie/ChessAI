@@ -13,7 +13,7 @@ My implementation of ASCII chess game with opponent AI.
 To build this project [Haskell Tool Stack](https://github.com/commercialhaskell/stack) is required. 
 ```
 $ stack build  
-$ stack exec functional
+$ stack exec ChessAI
 ```
 
 ### Hot to play
