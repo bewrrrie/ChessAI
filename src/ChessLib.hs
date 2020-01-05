@@ -1,8 +1,10 @@
 module ChessLib where
 
 import Data.Maybe (isNothing)
+import Data.List (isPrefixOf)
+import Data.Char (toLower)
 
--- Chess piece type
+-- Chess piece type.
 data Color = White | Black deriving (Eq, Show)
 data PieceType = Pawn
   | Rook   | Knight
@@ -10,14 +12,14 @@ data PieceType = Pawn
   | King deriving (Eq, Show)
 data Piece = Piece Color PieceType deriving (Eq)
 instance Show Piece where
---Show white pieces
+--Show white pieces:
   show (Piece White Pawn)   = "♙"
   show (Piece White Rook)   = "♖"
   show (Piece White Knight) = "♘"
   show (Piece White Bishop) = "♗"
   show (Piece White Queen)  = "♕"
   show (Piece White King)   = "♔"
---Show black pieces
+--Show black pieces:
   show (Piece Black Pawn)   = "♟"
   show (Piece Black Rook)   = "♜"
   show (Piece Black Knight) = "♞"
@@ -25,17 +27,17 @@ instance Show Piece where
   show (Piece Black Queen)  = "♛"
   show (Piece Black King)   = "♚"
 
--- Game board cell type
+-- Game board cell type.
 data Cell = Cell Color (Maybe Piece) deriving (Eq)
 instance Show Cell where
   show (Cell _ (Just piece)) = show piece
   show (Cell White Nothing)  = "▫"
   show (Cell Black Nothing)  = "▪"
 
--- Game board type
+-- Game board type.
 newtype Board = Board [[Cell]] deriving (Eq)
 
--- String representation of game board
+-- String representation of game board.
 instance Show Board where
   show (Board rows) = "\n" ++ showLetterCoordinates rows ++
                       showUpperBorder rows ++ showRows rows ++ showLowerBorder rows
@@ -51,13 +53,13 @@ instance Show Board where
           showCellsOnCurrentRow (cell:cells) = show cell ++ "│" ++ showCellsOnCurrentRow cells
           showLetterCoordinates (row:rows)   = " " ++ concatMap (\ x -> " " ++ [x]) ['A' .. 'H'] ++ "\n"
 
--- Chess game state type
+-- Chess game state type.
 data State = Move  Color | Check Color
            | Mate Color  | Draw
            | CheckMate Color deriving (Eq, Show)
 data Game = Game Board State deriving (Eq, Show)
 
--- Black pieces
+-- Black pieces.
 blackPawn, blackRook, blackKnight, blackBishop, blackQueen, blackKing :: Piece
 blackPawn   = Piece Black Pawn
 blackRook   = Piece Black Rook
@@ -66,7 +68,7 @@ blackBishop = Piece Black Bishop
 blackQueen  = Piece Black Queen
 blackKing   = Piece Black King
 
--- White pieces
+-- White pieces.
 whitePawn, whiteRook, whiteKnight, whiteBishop, whiteQueen, whiteKing :: Piece
 whitePawn   = Piece White Pawn
 whiteRook   = Piece White Rook
@@ -75,7 +77,7 @@ whiteBishop = Piece White Bishop
 whiteQueen  = Piece White Queen
 whiteKing   = Piece White King
 
--- Initial game board state
+-- Initial game board state.
 initialBoard :: Board
 initialBoard = Board cellsList
   where boardSize = 8
@@ -107,10 +109,35 @@ initialBoard = Board cellsList
 
         maybePiece _ _ = Nothing
 
--- Initial game state
+-- Initial game state.
 initialGame = Game initialBoard (Move White)
 
--- Transform game state function
+-- Parsing functions.
+-- Convert string to color type.
+parseColor :: String -> Maybe Color
+parseColor s
+  | isPrefixOf "w" $ map toLower s = Just White
+  | isPrefixOf "b" $ map toLower s = Just White
+  | otherwise = Nothing
+
+-- Convert string to tuple where.
+-- first two integers are coordinates of pieces that is going to be moved
+-- and second pair of integers are coordinates of square where is the piece
+-- going to be placed after move.
+parseMove :: String -> (Int, Int, Int, Int)
+parseMove [a, b, c, d] = (1,1,1,1)
+
+-- Game type functions.
+getBoard :: Game -> Board
+getBoard (Game board _) = board
+
+getState :: Game -> State
+getState (Game _ state) = state
+
+isGameFinished :: Game -> Bool
+isGameFinished (Game _ state) = False
+
+-- Transform game state function.
 makeMove :: Game -> Int -> Int -> Int -> Int -> Game
 makeMove game@(Game board (CheckMate White)) _ _ _ _ = game
 makeMove game@(Game board (CheckMate Black)) _ _ _ _ = game
