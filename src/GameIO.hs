@@ -1,8 +1,7 @@
 module GameIO where
 
-import ChessLib
+import ChessLib (makeMove)
 
--- Play game function
+-- IO interface function for reading input and getting output
 playChess :: IO ()
-playChess = play initialGame where
-  play _ = putStrLn "LOL"
+playChess = putStrLn "LOL"

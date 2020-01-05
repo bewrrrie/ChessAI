@@ -55,9 +55,7 @@ instance Show Board where
 data State = Move  Color | Check Color
            | Mate Color  | Draw
            | CheckMate Color deriving (Eq, Show)
-data Game = Game { gameBoard :: Board
-                 , gameState :: State
-                 } deriving (Eq, Show)
+data Game = Game Board State deriving (Eq, Show)
 
 -- Black pieces
 blackPawn, blackRook, blackKnight, blackBishop, blackQueen, blackKing :: Piece
@@ -110,5 +108,11 @@ initialBoard = Board cellsList
         maybePiece _ _ = Nothing
 
 -- Initial game state
-initialGame = Game { gameBoard = initialBoard
-                   , gameState = Move White }
+initialGame = Game initialBoard (Move White)
+
+-- Transform game state function
+makeMove :: Game -> Int -> Int -> Int -> Int -> Game
+makeMove game@(Game board (CheckMate White)) _ _ _ _ = game
+makeMove game@(Game board (CheckMate Black)) _ _ _ _ = game
+makeMove game@(Game board Draw)              _ _ _ _ = game
+makeMove game                                _ _ _ _ = game
