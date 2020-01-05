@@ -52,10 +52,23 @@ instance Show Board where
           showLetterCoordinates (row:rows)   = " " ++ concatMap (\ x -> " " ++ [x]) ['A' .. 'H'] ++ "\n"
 
 -- Chess game state type.
-data State = Move  Color | Check Color
-           | Mate Color  | Draw
-           | CheckMate Color deriving (Eq, Show)
-data Game = Game Board State deriving (Eq, Show)
+data State = Move Color | Check Color
+           | Mate Color | Draw
+           | CheckMate Color deriving (Eq)
+
+instance Show State where
+  show (Move White)      = "Move for White."
+  show (Move Black)      = "Move for Black."
+  show  Draw             = "Draw!"
+  show (Check White)     = "White is in check."
+  show (Check Black)     = "Black is in check."
+  show (CheckMate White) = "White is in checkmate."
+  show (CheckMate Black) = "Black is in checkmate."
+
+data Game = Game Board State deriving (Eq)
+
+instance Show Game where
+  show (Game board state) = show board ++ "\n" ++ show state
 
 -- Black pieces.
 blackPawn, blackRook, blackKnight, blackBishop, blackQueen, blackKing :: Piece
