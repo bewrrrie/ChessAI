@@ -123,6 +123,11 @@ initialBoard = Board cellsList
 -- Initial game state.
 initialGame = Game initialBoard (Move White)
 
+-- Switch color to opposite function
+switch :: Color -> Color
+switch Black = White
+switch White = Black
+
 -- Game type functions.
 getBoard :: Game -> Board
 getBoard (Game board _) = board
@@ -134,8 +139,11 @@ isGameFinished :: Game -> Bool
 isGameFinished (Game _ state) = state `elem` [Draw, CheckMate White, CheckMate Black]
 
 -- Transform game state function.
-makeMove :: Game -> (Int, Int, Int, Int) -> Game --TODO
-makeMove game@(Game board (CheckMate White)) (_, _, _, _) = game
-makeMove game@(Game board (CheckMate Black)) (_, _, _, _) = game
-makeMove game@(Game board Draw)              (_, _, _, _) = game
-makeMove game                                (_, _, _, _) = game
+makeMove :: Game -> (Int, Int, Int, Int) -> Game
+makeMove game@(Game board (CheckMate White)) _      = game
+makeMove game@(Game board (CheckMate Black)) _      = game
+makeMove game@(Game board Draw)              _      = game
+makeMove game@(Game board (Move color)) coordinates = movePieces color coordinates
+  where movePieces color coordinates = Game newBoard (Move (switch color))
+        newBoard = board --TODO
+
