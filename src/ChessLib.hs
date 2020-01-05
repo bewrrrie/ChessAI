@@ -131,7 +131,7 @@ getState :: Game -> State
 getState (Game _ state) = state
 
 isGameFinished :: Game -> Bool
-isGameFinished (Game _ state) = False
+isGameFinished (Game _ state) = state `elem` [Draw, CheckMate White, CheckMate Black]
 
 -- Transform game state function.
 makeMove :: Game -> (Int, Int, Int, Int) -> Game --TODO
