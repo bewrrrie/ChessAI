@@ -84,28 +84,28 @@ initialBoard = Board cellsList
         cellsList = [ [placePiece i j | i <- [1..boardSize]]
                                       | j <- [1..boardSize] ]
         placePiece x y                   = Cell (color x y) (maybePiece x y)
-        color x y | (x + y) `mod` 2 == 0 = Black
-                  | otherwise            = White
+        color x y | (x + y) `mod` 2 == 0 = White
+                  | otherwise            = Black
 
-        maybePiece 8 1 = Just blackRook
-        maybePiece 1 1 = Just blackRook
-        maybePiece 2 1 = Just blackKnight
-        maybePiece 7 1 = Just blackKnight
-        maybePiece 3 1 = Just blackBishop
-        maybePiece 6 1 = Just blackBishop
-        maybePiece 4 1 = Just blackQueen
-        maybePiece 5 1 = Just blackKing
-        maybePiece _ 2 = Just blackPawn
+        maybePiece 8 8 = Just blackRook
+        maybePiece 1 8 = Just blackRook
+        maybePiece 2 8 = Just blackKnight
+        maybePiece 7 8 = Just blackKnight
+        maybePiece 3 8 = Just blackBishop
+        maybePiece 6 8 = Just blackBishop
+        maybePiece 4 8 = Just blackQueen
+        maybePiece 5 8 = Just blackKing
+        maybePiece _ 7 = Just blackPawn
 
-        maybePiece _ 7 = Just whitePawn
-        maybePiece 5 8 = Just whiteKing
-        maybePiece 4 8 = Just whiteQueen
-        maybePiece 6 8 = Just whiteBishop
-        maybePiece 3 8 = Just whiteBishop
-        maybePiece 7 8 = Just whiteKnight
-        maybePiece 2 8 = Just whiteKnight
-        maybePiece 1 8 = Just whiteRook
-        maybePiece 8 8 = Just whiteRook
+        maybePiece _ 2 = Just whitePawn
+        maybePiece 5 1 = Just whiteKing
+        maybePiece 4 1 = Just whiteQueen
+        maybePiece 6 1 = Just whiteBishop
+        maybePiece 3 1 = Just whiteBishop
+        maybePiece 7 1 = Just whiteKnight
+        maybePiece 2 1 = Just whiteKnight
+        maybePiece 1 1 = Just whiteRook
+        maybePiece 8 1 = Just whiteRook
 
         maybePiece _ _ = Nothing
 
