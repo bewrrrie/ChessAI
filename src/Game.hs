@@ -9,10 +9,6 @@ data PieceType = Pawn
   | Bishop | Queen
   | King deriving (Eq, Show)
 data Piece = Piece Color PieceType deriving (Eq)
-
--- Game board cell type
-data Cell = Cell Color (Maybe Piece) deriving (Eq)
-
 instance Show Piece where
 --Show white pieces
   show (Piece White Pawn)   = "♙"
@@ -29,6 +25,8 @@ instance Show Piece where
   show (Piece Black Queen)  = "♛"
   show (Piece Black King)   = "♚"
 
+-- Game board cell type
+data Cell = Cell Color (Maybe Piece) deriving (Eq)
 instance Show Cell where
   show (Cell _ (Just piece)) = show piece
   show (Cell White Nothing)  = "▫"
