@@ -1,9 +1,5 @@
 module ChessLib where
 
-import Data.Maybe (isNothing)
-import Data.List (isPrefixOf)
-import Data.Char (toLower)
-
 -- Chess piece type.
 data Color = White | Black deriving (Eq, Show)
 data PieceType = Pawn
@@ -11,6 +7,7 @@ data PieceType = Pawn
   | Bishop | Queen
   | King deriving (Eq, Show)
 data Piece = Piece Color PieceType deriving (Eq)
+
 instance Show Piece where
 --Show white pieces:
   show (Piece White Pawn)   = "♙"
@@ -29,6 +26,7 @@ instance Show Piece where
 
 -- Game board cell type.
 data Cell = Cell Color (Maybe Piece) deriving (Eq)
+
 instance Show Cell where
   show (Cell _ (Just piece)) = show piece
   show (Cell White Nothing)  = "▫"
@@ -111,21 +109,6 @@ initialBoard = Board cellsList
 
 -- Initial game state.
 initialGame = Game initialBoard (Move White)
-
--- Parsing functions.
--- Convert string to color type.
-parseColor :: String -> Maybe Color
-parseColor s
-  | isPrefixOf "w" $ map toLower s = Just White
-  | isPrefixOf "b" $ map toLower s = Just White
-  | otherwise = Nothing
-
--- Convert string to tuple where.
--- first two integers are coordinates of pieces that is going to be moved
--- and second pair of integers are coordinates of square where is the piece
--- going to be placed after move.
-parseMove :: String -> (Int, Int, Int, Int)
-parseMove [a, b, c, d] = (1,1,1,1)
 
 -- Game type functions.
 getBoard :: Game -> Board
