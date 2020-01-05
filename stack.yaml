@@ -34,8 +34,7 @@ packages:
 # These entries can reference officially published versions as well as
 # forks / in-progress versions pinned to a git hash. For example:
 
-extra-deps:
-- gloss-1.13.1.1
+# extra-deps:
 
 # extra-deps: []
 
