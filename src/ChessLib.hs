@@ -1,5 +1,7 @@
 module ChessLib where
 
+import Data.Maybe(isNothing)
+
 -- Chess piece type.
 data Color = White | Black deriving (Eq, Show)
 data PieceType = Pawn
@@ -70,6 +72,19 @@ data Game = Game Board State deriving (Eq)
 instance Show Game where
   show (Game board state) = show board ++ "\n" ++ show state
 
+-- Cell constants.
+emptyCell :: Color -> Cell
+emptyCell color = Cell color Nothing
+
+getCellColor :: Cell -> Color
+getCellColor (Cell color _) = color
+
+setCellColor :: Color -> Cell -> Cell
+setCellColor color (Cell _ mbp) = Cell color mbp
+
+getCellPiece :: Cell -> Maybe Piece
+getCellPiece (Cell _ mbp) = mbp
+
 -- Black pieces.
 blackPawn, blackRook, blackKnight, blackBishop, blackQueen, blackKing :: Piece
 blackPawn   = Piece Black Pawn
@@ -124,26 +139,47 @@ initialBoard = Board cellsList
 initialGame = Game initialBoard (Move White)
 
 -- Switch color to opposite function
-switch :: Color -> Color
-switch Black = White
-switch White = Black
+switchColor :: Color -> Color
+switchColor Black = White
+switchColor White = Black
+
+-- Game board functions.
+getCell :: Board -> (Int, Int) -> Cell
+getCell (Board cells) (x,y) = cells !! y !! x
+
+setCell :: (Int, Int) -> Cell -> Board -> Board
+setCell (x,y) cell (Board rows) = Board (replace y newRow rows)
+  -- Replace list element function.
+  where replace :: Int -> a -> [a] -> [a]
+        replace n newElement xs = take n xs ++ [newElement] ++ drop (n + 1) xs
+        newRow = replace x cell (rows !! y)
+
+isNothingCell :: Cell -> Bool
+isNothingCell (Cell _ mbp) = isNothing mbp
 
 -- Game type functions.
-getBoard :: Game -> Board
-getBoard (Game board _) = board
-
-getState :: Game -> State
-getState (Game _ state) = state
-
 isGameFinished :: Game -> Bool
-isGameFinished (Game _ state) = state `elem` [Draw, CheckMate White, CheckMate Black]
+isGameFinished (Game _ state) = state `elem` [ Draw
+                                             , CheckMate White
+                                             , CheckMate Black ]
 
 -- Transform game state function.
-makeMove :: Game -> (Int, Int, Int, Int) -> Game
-makeMove game@(Game board (CheckMate White)) _      = game
-makeMove game@(Game board (CheckMate Black)) _      = game
-makeMove game@(Game board Draw)              _      = game
-makeMove game@(Game board (Move color)) coordinates = movePieces color coordinates
-  where movePieces color coordinates = Game newBoard (Move (switch color))
-        newBoard = board --TODO
+transformGame :: Game -> (Int, Int, Int, Int) -> Game
+transformGame game@(Game board state) move@(x, y, x', y') = Game (transformBoard board)
+                                                                 (transformState state)
+  where transformState (Move color) = Move (switchColor color)
+        transformState state        = state
+        srcCell                     = getCell board (x,  y )
+        destCell                    = getCell board (x', y')
+        transformBoard board        = if isNothingCell srcCell
+                                      then error "You tried to move piece from empty cell!"
+                                      else setCell (x', y') newDestCell $
+                                           setCell (x,  y ) newSrcCell board
+                                      where newSrcCell  = emptyCell (getCellColor srcCell)
+                                            newDestCell = Cell (getCellColor destCell) (getCellPiece srcCell)
 
+makeMove :: Game -> (Int, Int, Int, Int) -> Game
+makeMove game@(Game board (CheckMate White)) _ = game
+makeMove game@(Game board (CheckMate Black)) _ = game
+makeMove game@(Game board Draw)              _ = game
+makeMove game@(Game _     (Move _))       move = transformGame game move
