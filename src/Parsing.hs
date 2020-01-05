@@ -26,7 +26,7 @@ parseMove (a:b:c:d:_) = ( fromMaybe (error $ errMessage a) $
                         , transformAndCheck d - 1 )
   where errMessage char = "Could not parse coordinate '"
                           ++ [char] ++ "'!"
-        transformAndCheck char = if -1 < intCoordinate && intCoordinate < 8
+        transformAndCheck char = if 1 <= intCoordinate && intCoordinate <= 8
                                  then intCoordinate
                                  else error (errMessage char)
           where intCoordinate = (read::String->Int) [char]
