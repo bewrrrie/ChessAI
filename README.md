@@ -24,9 +24,9 @@ You can type `B` to play for Black pieces or `W` to play for White pieces or you
 ```
   A B C D E F G H
  ┏━┯━┯━┯━┯━┯━┯━┯━┓
-8┃♖│♘│♗│♕│♔│♗│♘│♖┃8
+8┃♜│♞│♝│♛│♚│♝│♞│♜┃8
  ┠─┼─┼─┼─┼─┼─┼─┼─┨
-7┃♙│♙│♙│♙│♙│♙│♙│♙┃7
+7┃♟│♟│♟│♟│♟│♟│♟│♟┃7
  ┠─┼─┼─┼─┼─┼─┼─┼─┨
 6┃▫│▪│▫│▪│▫│▪│▫│▪┃6
  ┠─┼─┼─┼─┼─┼─┼─┼─┨
@@ -36,34 +36,34 @@ You can type `B` to play for Black pieces or `W` to play for White pieces or you
  ┠─┼─┼─┼─┼─┼─┼─┼─┨
 3┃▪│▫│▪│▫│▪│▫│▪│▫┃3
  ┠─┼─┼─┼─┼─┼─┼─┼─┨
-2┃♟│♟│♟│♟│♟│♟│♟│♟┃2
+2┃♙│♙│♙│♙│♙│♙│♙│♙┃2
  ┠─┼─┼─┼─┼─┼─┼─┼─┨
-1┃♜│♞│♝│♛│♚│♝│♞│♜┃1
+1┃♖│♘│♗│♕│♔│♗│♘│♖┃1
  ┗━┷━┷━┷━┷━┷━┷━┷━┛
   A B C D E F G H
 
 Move for White.
 ```  
-If you decided to play for White you can choose the way you are going to move your pieces.
-For example: `e2e4`. This will affect on game board in such way.   
+If you decided to play for White you can choose the way you are going to move your pieces.  
+For example you can type: `e2e4`. This will affect on game board in such way.   
 ```
   A B C D E F G H
  ┏━┯━┯━┯━┯━┯━┯━┯━┓
-8┃♖│♘│♗│♕│♔│♗│♘│♖┃8
+8┃♜│♞│♝│♛│♚│♝│♞│♜┃8
  ┠─┼─┼─┼─┼─┼─┼─┼─┨
-7┃♙│♙│♙│♙│♙│♙│♙│♙┃7
+7┃♟│♟│♟│♟│♟│♟│♟│♟┃7
  ┠─┼─┼─┼─┼─┼─┼─┼─┨
 6┃▫│▪│▫│▪│▫│▪│▫│▪┃6
  ┠─┼─┼─┼─┼─┼─┼─┼─┨
 5┃▪│▫│▪│▫│▪│▫│▪│▫┃5
  ┠─┼─┼─┼─┼─┼─┼─┼─┨
-4┃▫│▪│▫│▪│♟│▪│▫│▪┃4
+4┃▫│▪│▫│▪│♙│▪│▫│▪┃4
  ┠─┼─┼─┼─┼─┼─┼─┼─┨
 3┃▪│▫│▪│▫│▪│▫│▪│▫┃3
  ┠─┼─┼─┼─┼─┼─┼─┼─┨
-2┃♟│♟│♟│♟│▫│♟│♟│♟┃2
+2┃♙│♙│♙│♙│▫│♙│♙│♙┃2
  ┠─┼─┼─┼─┼─┼─┼─┼─┨
-1┃♜│♞│♝│♛│♚│♝│♞│♜┃1
+1┃♖│♘│♗│♕│♔│♗│♘│♖┃1
  ┗━┷━┷━┷━┷━┷━┷━┷━┛
   A B C D E F G H
 
