@@ -134,8 +134,8 @@ isGameFinished :: Game -> Bool
 isGameFinished (Game _ state) = False
 
 -- Transform game state function.
-makeMove :: Game -> Int -> Int -> Int -> Int -> Game
-makeMove game@(Game board (CheckMate White)) _ _ _ _ = game
-makeMove game@(Game board (CheckMate Black)) _ _ _ _ = game
-makeMove game@(Game board Draw)              _ _ _ _ = game
-makeMove game                                _ _ _ _ = game
+makeMove :: Game -> (Int, Int, Int, Int) -> Game --TODO
+makeMove game@(Game board (CheckMate White)) (_, _, _, _) = game
+makeMove game@(Game board (CheckMate Black)) (_, _, _, _) = game
+makeMove game@(Game board Draw)              (_, _, _, _) = game
+makeMove game                                (_, _, _, _) = game
