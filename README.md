@@ -19,7 +19,8 @@ $ stack exec ChessAI
 ### Hot to play
 - First you should choose color that you will be playing for.  
 `Select color ('B'/'W' or 'q' to quit): `  
-You can type `B` to play for Black pieces or `W` to play for White pieces or you can quit the game by typing any string starting with `q` or `Q`.  
+You can type any string starting with `b` or `B` to play for Black pieces or string starting with `w` or `W` to play for White pieces.  
+You can quit the game by typing any string starting with `q` or `Q`.  
 - Then the game board wil appear.  
 ```
   A B C D E F G H
