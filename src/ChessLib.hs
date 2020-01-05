@@ -182,9 +182,13 @@ isGameFinished (Game _ state) = state `elem` [ Draw
                                              , CheckMate Black ]
 
 -- Transform game state function.
+isMoveAllowed :: Cell -> Cell -> (Int, Int, Int, Int) -> Bool
+isMoveAllowed (Cell _ _) destCell move@(x,y,x',y') = False --TODO restrict moves for specific pieces
+
+
 transformGame :: Game -> (Int, Int, Int, Int) -> Game
-transformGame game@(Game board state) move@(x, y, x', y') = Game (transformBoard board state)
-                                                                 (transformState state)
+transformGame game@(Game board state) move@(x,y,x',y') = Game (transformBoard board state)
+                                                              (transformState state)
   where transformState (Move color) = if Just color == maybePieceColorOnSrcCell
                                       then Move (switchColor color)
                                       else Move color
@@ -195,9 +199,9 @@ transformGame game@(Game board state) move@(x, y, x', y') = Game (transformBoard
         destCell                 = getCell board (x', y')
 
         -- TODO checks, checkmates and draws
-        -- TODO restrict moves for specific pieces
-        transformBoard board (Move color) = if isNothingCell srcCell ||
-                                               Just color /= maybePieceColorOnSrcCell
+        transformBoard board (Move color) = if ( isNothingCell srcCell ||
+                                                 Just color /= maybePieceColorOnSrcCell )
+                                               && isMoveAllowed srcCell destCell move
                                             then board
                                             else setCell (x', y') newDestCell $
                                                  setCell (x,  y ) newSrcCell board
