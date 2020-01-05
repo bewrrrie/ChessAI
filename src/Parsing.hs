@@ -30,3 +30,7 @@ parseMove (a:b:c:d:_) = ( fromMaybe (error $ errMessage a) $
                                  then intCoordinate
                                  else error (errMessage char)
           where intCoordinate = (read::String->Int) [char]
+
+-- Check if command to quit was written
+parseQuit :: String -> Bool
+parseQuit = (== 'q') . toLower . head 
