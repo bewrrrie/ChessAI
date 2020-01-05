@@ -195,6 +195,7 @@ transformGame game@(Game board state) move@(x, y, x', y') = Game (transformBoard
         destCell                 = getCell board (x', y')
 
         -- TODO checks, checkmates and draws
+        -- TODO restrict moves for specific pieces
         transformBoard board (Move color) = if isNothingCell srcCell ||
                                                Just color /= maybePieceColorOnSrcCell
                                             then board
