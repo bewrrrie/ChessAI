@@ -20,10 +20,10 @@ parseColor s
 parseMove :: String -> (Int, Int, Int, Int)
 parseMove (a:b:c:d:_) = ( fromMaybe (error $ errMessage a) $
                           elemIndex (toLower a) ['a' .. 'h']
-                        , 8 - transformAndCheck b
+                        , transformAndCheck b - 1
                         , fromMaybe (error $ errMessage c) $
                           elemIndex (toLower c) ['a' .. 'h']
-                        , 8 - transformAndCheck d )
+                        , transformAndCheck d - 1 )
   where errMessage char = "Could not parse coordinate '"
                           ++ [char] ++ "'!"
         transformAndCheck char = if -1 < intCoordinate && intCoordinate < 8
