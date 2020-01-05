@@ -22,7 +22,7 @@ First you should choose color that you will be playing for.
 You can type any string starting with `b` or `B` to play for Black pieces  
 or string starting with `w` or `W` to play for White pieces.  
 You can quit the game by typing any string starting with `q` or `Q`.  
-Then the game board wil appear.  
+When the pieces color is selected the game board will appear.  
 ```
   A B C D E F G H
  ┏━┯━┯━┯━┯━┯━┯━┯━┓
