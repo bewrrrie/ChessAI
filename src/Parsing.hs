@@ -9,8 +9,8 @@ import Data.Maybe (fromMaybe)
 -- Convert string to color type.
 parseColor :: String -> Maybe Color
 parseColor s
-  | isPrefixOf "w" $ map toLower s = Just White
-  | isPrefixOf "b" $ map toLower s = Just White
+  | 'w' == toLower (head s) = Just White
+  | 'b' == toLower (head s) = Just White
   | otherwise = Nothing
 
 -- Convert string to tuple of four integers where
@@ -18,6 +18,7 @@ parseColor s
 -- and second pair of integers are coordinates of square where is the piece
 -- going to be placed after move.
 parseMove :: String -> (Int, Int, Int, Int)
+parseMove []          = error "Could not parse move from empty string!"
 parseMove (a:b:c:d:_) = ( fromMaybe (error $ errMessage a) $
                           elemIndex (toLower a) ['a' .. 'h']
                         , 8 - transformAndCheck b
