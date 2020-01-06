@@ -40,8 +40,8 @@ gameLoop playerColor game = do { print game
                                  then putStr "Make your move: "
                                  else putStr "AI is going to make its decision."
                                ; cmd <- getLine
-                               ; if isNothing maybeMoveColor
-                                 then putStrLn "Game is finished.\nFinishing game process..."
+                               ; if isNothing maybeMoveColor || parseQuit cmd
+                                 then putStrLn "Finishing game process..."
                                  else do { let move = inferMove game playerColor maybeMoveColor cmd
                                          ; let newGame = makeMove game move
                                          ; if isGameFinished newGame
