@@ -1,4 +1,3 @@
-{-# LANGUAGE BlockArguments #-}
 module GameIO where
 
 import ChessLib
