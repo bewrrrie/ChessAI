@@ -21,10 +21,7 @@ After executing `$ stack build` path to generated executable file will be shown.
 ### How to play
 First you should choose color that you will be playing for.  
 `Select color ('B'/'W' or 'q' to quit): `  
-You can type any string starting with `b` or `B` to play for Black pieces  
-or string starting with `w` or `W` to play for White pieces.  
-You can quit the game by typing any string starting with `q` or `Q`.  
-When the pieces color is selected the game board will appear.  
+You can type any string starting with `b` or `B` to play for Black pieces or string starting with `w` or `W` to play for White pieces. You can quit the game by typing any string starting with `q` or `Q`. When the pieces color is selected the game board will appear.  
 ```
   A B C D E F G H
  ┏━┯━┯━┯━┯━┯━┯━┯━┓
@@ -48,8 +45,7 @@ When the pieces color is selected the game board will appear.
 
 Move for White.
 ```  
-If you decided to play for White you can choose the way you are going to move your pieces.  
-For example you can type: `e2e4`. This will affect on game board in such way.   
+If you decided to play for White you can choose the way you are going to move your pieces. For example you can type: `e2e4`. This will affect on game board in such way.   
 ```
   A B C D E F G H
  ┏━┯━┯━┯━┯━┯━┯━┯━┓
