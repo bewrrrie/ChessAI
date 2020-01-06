@@ -11,17 +11,18 @@ import Data.Maybe (fromMaybe, isNothing)
 -- Piece move inference function.
 -- If it is our turn we parse the move from cmd
 -- otherwise if it is AI's turn move must be inferred by minimax algorithm.
-inferMove :: Game -> Color -> Maybe Color -> String -> (Int, Int, Int, Int)
-inferMove game playerColor (Just color) cmd = if color == playerColor
-                                              then parseMove cmd
-                                              else aiDecide game color
-inferMove _    _            Nothing     _   = error "Move color is Nothing!"
+inferMove :: Game -> Maybe Color -> Maybe Color -> String -> (Int, Int, Int, Int)
+inferMove _    Nothing     _                      _   = error "Move color is Nothing!"
+inferMove _    _           Nothing                _   = error "Move color is Nothing!"
+inferMove game playerColor moveColor@(Just color) cmd = if moveColor == playerColor
+                                                        then parseMove cmd
+                                                        else aiDecide game color
 
 -- Main game loop.
-gameLoop :: Color -> Game -> IO ()
+gameLoop :: Maybe Color -> Game -> IO ()
 gameLoop playerColor game = do { print game
                                ; let maybeMoveColor = getMoveColor (getGameState game)
-                               ; if maybeMoveColor == Just playerColor
+                               ; if maybeMoveColor == playerColor
                                  then putStr "Make your move: "
                                  else putStr "AI is going to make its decision."
                                ; cmd <- getLine
@@ -42,5 +43,5 @@ playChess = do { hSetBuffering stdout NoBuffering
                ; if parseQuit cmd
                  then putStrLn "Finishing game process..."
                  else do {
-                         ; let playerColor = fromMaybe White (parseColor cmd)
+                         ; let playerColor = parseColor cmd
                          ; gameLoop playerColor initialGame } }
