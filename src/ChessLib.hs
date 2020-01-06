@@ -182,8 +182,8 @@ setCell (x,y) cell (Board cells) = Board (replace (x,y) cell cells)
                                       else x : replace t newElement xs
         replace _ _           []    = error "Could not replace element on empty board!"
 
-isNothingCell :: Cell -> Bool
-isNothingCell (Cell _ _ mbp) = isNothing mbp
+isCellNothing :: Cell -> Bool
+isCellNothing (Cell _ _ mbp) = isNothing mbp
 
 -- Game type functions.
 getGameState :: Game -> State
@@ -195,34 +195,49 @@ isGameFinished (Game _ state) = state `elem` [ Draw
                                              , CheckMate Black ]
 
 -- Transform game state function.
-isMoveAllowed :: Cell -> Cell -> (Int, Int, Int, Int) -> Bool
-isMoveAllowed _ destCell move@(x,y,x',y') = True --TODO restrict moves for specific pieces
+isMoveAllowed :: Color -> Maybe Piece -> Board -> (Int, Int, Int, Int) -> Bool
+isMoveAllowed _          Nothing                             _            _                = False
+isMoveAllowed moveColor (Just (Piece pieceColor pieceType)) (Board cells) move@(x,y,x',y') =
+  moveColor == pieceColor && case pieceType of
+    -- TODO collisions with other pieces
+    Pawn   -> dx == 0 && 0 > dy && dy > -3
+    Rook   -> abs (x - x') == 0 || abs (y - y') == 0
+    Knight -> l1Dist == 3
+    Bishop -> absDx == absDy
+    King   -> 0 < l1Dist && l1Dist < 3
+    Queen  -> absDx == absDy
+           || 0 < l1Dist && l1Dist < 3
+           || absDx == 0
+           || absDy == 0
+  where l1Dist = abs (x - x') + abs (y - y')
+        dx     = x' - x
+        dy     = y' - y
+        absDx  = abs dx
+        absDy  = abs dy
 
 
 transformGame :: Game -> (Int, Int, Int, Int) -> Game
 transformGame game@(Game board state) move@(x,y,x',y') = Game (transformBoard board state)
                                                               (transformState state)
-  where transformState (Move color) = if Just color == maybePieceColorOnSrcCell
-                                      then Move (switchColor color)
-                                      else Move color
-        transformState state        = state
+  where transformState state@(Move color) = if   canMove move state
+                                            then Move (switchColor color) -- TODO add checks, checkmates and draws
+                                            else state
+        transformState state              = state
         maybePieceColorOnSrcCell = getMaybePieceColor (getCellPiece srcCell)
         srcCell                  = getCell board (x,  y )
         destCell                 = getCell board (x', y')
-
-        -- TODO checks, checkmates and draws
-        transformBoard board (Move color) = if isNothingCell srcCell ||
-                                               Just color /= maybePieceColorOnSrcCell ||
-                                               not (isMoveAllowed srcCell destCell move)
-                                            then board
-                                            else setCell (x', y') newDestCell $
-                                                 setCell (x,  y ) newSrcCell board
-                                            where newSrcCell  = emptyCell (getCellCoordinates srcCell)
-                                                                          (getCellColor srcCell)
-                                                  newDestCell = Cell (getCellCoordinates destCell)
-                                                                     (getCellColor destCell)
-                                                                     (getCellPiece srcCell)
-        transformBoard board _            = board
+        transformBoard board state@(Move color) = if   canMove move state
+                                                  then setCell (x', y') newDestCell $
+                                                       setCell (x,  y ) newSrcCell board
+                                                  else board
+                                                  where newSrcCell  = emptyCell (getCellCoordinates srcCell)
+                                                                                (getCellColor srcCell)
+                                                        newDestCell = Cell (getCellCoordinates destCell)
+                                                                           (getCellColor destCell)
+                                                                           (getCellPiece srcCell)
+        transformBoard board _                  = board
+        canMove move@(x,y,x',y') (Move color)   = abs (x - x') + abs (y - y') > 0 &&
+                                                  isMoveAllowed color (getCellPiece srcCell) board move
 
 makeMove :: Game -> (Int, Int, Int, Int) -> Game
 makeMove game@(Game board (CheckMate White)) _ = game
