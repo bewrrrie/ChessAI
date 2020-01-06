@@ -183,7 +183,7 @@ buildRoute board move@(x,y,x',y') | x==x' && y==y'           = []
                                   | x==x'                    = tail $ buildVerticalRoute   board move
                                   | y==y'                    = tail $ buildHorizontalRoute board move
                                   | abs (x-x') == abs (y-y') = tail $ buildDiagonalRoute   board move
-                                  | otherwise                = error "Route can be only straight or diagonal!"
+                                  | otherwise                = [] -- Only straight diagonal routes are allowed!
   where buildVerticalRoute   board (x,y,x',y') | y'-y > 0   = cell : buildVerticalRoute board (x,y+1,x',y')
                                                | y'-y < 0   = cell : buildVerticalRoute board (x,y-1,x',y')
                                                | otherwise  = [] where cell = getCell board (x,y)
@@ -236,16 +236,21 @@ isMoveAllowed moveColor (Just (Piece pieceColor pieceType)) board@(Board cells) 
                        else dx == 0 && 0 < dy && dy < 2
                   &&   isNothing destMaybePiece && isCleanRoute (buildRoute board move) )
                   || ( isJust destMaybePiece && (moveColor /= destPieceColor) && dy == 1 && absDx == 1 )
-    (_, Rook  )   -> abs (x - x') == 0 || abs (y - y') == 0 -- TODO collision checking for Rook
-    (_, Knight)   -> l1Dist == 3                            -- TODO collision checking for Knight
-    (_, Bishop)   -> absDx == absDy                         -- TODO collision checking for Bishop
-    (_, King  )   -> 0 < l1Dist && l1Dist < 3               -- TODO collision checking for King
-    (_, Queen )   -> absDx == absDy                         -- TODO collision checking for Queen
-                  || 0 < l1Dist && l1Dist < 3
-                  || absDx == 0
-                  || absDy == 0
+    (_, Rook  )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
+                  && isCleanRoute (buildRoute board move) && (abs (x - x') == 0 || abs (y - y') == 0)
+    (_, Knight)   -> ( isNothing destMaybePiece || destPieceColor /= moveColor ) && l1Dist == 3
+    (_, Bishop)   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
+                  && isCleanRoute (buildRoute board move) && absDx == absDy
+    (_, King  )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
+                  && isCleanRoute (buildRoute board move) && 0 < l1Dist && l1Dist < 3
+    (_, Queen )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
+                  && isCleanRoute (buildRoute board move) && ( absDx == absDy
+                                                            || 0 < l1Dist && l1Dist < 3
+                                                            || absDx == 0
+                                                            || absDy == 0 )
   where destMaybePiece = getCellPiece $ getCell board (x',y')
-        destPieceColor = fromMaybe (error "") (getMaybePieceColor destMaybePiece)
+        destPieceColor = fromMaybe (error "Could not get piece color because cell was empty!")
+                                   (getMaybePieceColor destMaybePiece)
         l1Dist = abs (x - x') + abs (y - y')
         dx     = x' - x
         dy     = y' - y
