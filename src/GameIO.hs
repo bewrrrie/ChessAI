@@ -1,11 +1,20 @@
 module GameIO where
 
-import ChessLib
-import ChessAI
-import Parsing
 import System.IO
 import Control.Monad
 import Data.Maybe (fromMaybe, isNothing)
+
+import ChessLib ( Game
+                , Color
+                , getMoveColor
+                , getGameState
+                , isGameFinished
+                , initialGame
+                , makeMove  )
+import Parsing  ( parseMove
+                , parseColor
+                , parseQuit )
+import ChessAI  ( aiDecide  )
 
 -- Piece move inference function.
 -- If it is our turn we parse the move from cmd
