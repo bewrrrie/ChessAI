@@ -24,7 +24,8 @@ inferMove _    Nothing     _                      _   = error "Move color is Not
 inferMove _    _           Nothing                _   = error "Move color is Nothing!"
 inferMove game playerColor moveColor@(Just color) cmd = if moveColor == playerColor
                                                         then unpackParsedMove $ parseMove cmd
-                                                        else aiDecide game color
+                                                        else unpackParsedMove $ parseMove cmd
+                                                        -- TODO replace else option with `aiDecide game color`
   where unpackParsedMove (Nothing,_,_,_)                 = (0,0,0,0)
         unpackParsedMove (_,Nothing,_,_)                 = (0,0,0,0)
         unpackParsedMove (_,_,Nothing,_)                 = (0,0,0,0)
