@@ -27,31 +27,39 @@ instance Show Piece where
   show (Piece Black King)   = "♚"
 
 -- Game board cell type.
-data Cell = Cell Color (Maybe Piece) deriving (Eq)
+data Cell = Cell (Int, Int) Color (Maybe Piece) deriving (Eq)
 
 instance Show Cell where
-  show (Cell _ (Just piece)) = show piece
-  show (Cell White Nothing)  = "▫"
-  show (Cell Black Nothing)  = "▪"
+  show (Cell _ _ (Just piece)) = show piece
+  show (Cell _ White Nothing)  = "▫"
+  show (Cell _ Black Nothing)  = "▪"
 
 -- Game board type.
-newtype Board = Board [[Cell]] deriving (Eq)
+newtype Board = Board [Cell] deriving (Eq)
 
 -- String representation of game board.
 instance Show Board where
-  show (Board rows) = "\n" ++ showLetterCoordinates rows ++
-                      showUpperBorder rows ++ showRows rows ++ showLowerBorder rows
-                      ++ showLetterCoordinates rows
-    where showUpperBorder (row:rows) = " ┏" ++ concat (replicate (length row - 1) "━┯") ++ "━┓\n"
-          showLowerBorder (row:rows) = " ┗" ++ concat (replicate (length row - 1) "━┷") ++ "━┛\n"
-          showRowsSplitter row       = " ┠" ++ concat (replicate (length row - 1) "─┼") ++ "─┨\n"
-          showRows   [row]           = "1┃" ++ showCellsOnCurrentRow row ++ "┃1\n"
-          showRows   (row:rows)      = coordinate ++ "┃" ++ showCellsOnCurrentRow row ++ "┃" ++ coordinate
-                                       ++ "\n" ++ showRowsSplitter row
-                                       ++ showRows rows where coordinate = show (1 + length rows)
-          showCellsOnCurrentRow [cell]       = show cell
-          showCellsOnCurrentRow (cell:cells) = show cell ++ "│" ++ showCellsOnCurrentRow cells
-          showLetterCoordinates (row:rows)   = " " ++ concatMap (\ x -> " " ++ [x]) ['A' .. 'H'] ++ "\n"
+  show (Board cells) = "\n" ++ showLetterCoordinates
+                            ++ showUpperBorder
+                            ++ showCells cells 8
+                            ++ showLowerBorder
+                            ++ showLetterCoordinates
+    where showLetterCoordinates = " "  ++ concatMap (\ x -> " " ++ [x]) ['A' .. 'H'] ++ "\n"
+          showUpperBorder       = " ┏" ++ concat    (replicate 7 "━┯")               ++ "━┓\n"
+          showLowerBorder       = " ┗" ++ concat    (replicate 7 "━┷")               ++ "━┛\n"
+          showRowsSplitter      = " ┠" ++ concat    (replicate 7 "─┼")               ++ "─┨\n"
+          showCells []     _    = ""
+          showCells (c:cs) 1    = "┃" ++ show c ++ "┃"
+                                      ++ show (8 - (snd . getCellCoordinates) c) -- invert Y coordinate
+                                      ++ "\n"
+                                      ++ ( if   (snd . getCellCoordinates) c < 7
+                                           then showRowsSplitter
+                                           else "" )
+                                      ++ showCells cs 8
+          showCells (c:cs) 8    = show (8 - (snd . getCellCoordinates) c) ++
+                                  "┃" ++ show c ++ showCells cs 7
+          showCells (c:cs) n    = "┃" ++ show c ++ showCells cs (n-1)
+
 
 -- Chess game state type.
 data State = Move Color | Check Color
@@ -92,11 +100,8 @@ whiteKing   = Piece White King
 
 -- Initial game board state.
 initialBoard :: Board
-initialBoard = Board cellsList
-  where boardSize = 8
-        cellsList = [ [placePiece i j | i <- [0..boardSize - 1]]
-                                      | j <- [0..boardSize - 1] ]
-        placePiece x y                   = Cell (color x y) (maybePiece x y)
+initialBoard = Board [placePiece (k `mod` 8) (k `div` 8) | k <- [0..63]]
+  where placePiece x y = Cell (x, y) (color x y) (maybePiece x y)
         color x y | (x + y) `mod` 2 == 0 = White
                   | otherwise            = Black
 
@@ -131,17 +136,17 @@ getMaybePieceColor (Just (Piece color _)) = Just color
 getMaybePieceColor Nothing = Nothing
 
 -- Cell functions.
-emptyCell :: Color -> Cell
-emptyCell color = Cell color Nothing
+emptyCell :: (Int, Int) -> Color -> Cell
+emptyCell t color = Cell t color Nothing
 
 getCellColor :: Cell -> Color
-getCellColor (Cell color _) = color
+getCellColor (Cell _ color _) = color
 
 setCellColor :: Color -> Cell -> Cell
-setCellColor color (Cell _ mbp) = Cell color mbp
+setCellColor color (Cell t _ mbp) = Cell t color mbp
 
 getCellPiece :: Cell -> Maybe Piece
-getCellPiece (Cell _ mbp) = mbp
+getCellPiece (Cell _ _ mbp) = mbp
 
 -- State functions
 getMoveColor :: State -> Maybe Color
@@ -159,18 +164,26 @@ switchMaybeColor (Just White) = Just Black
 switchMaybeColor Nothing = Nothing
 
 -- Game board functions.
+getCellCoordinates :: Cell -> (Int, Int)
+getCellCoordinates (Cell t _ _) = t
+
 getCell :: Board -> (Int, Int) -> Cell
-getCell (Board cells) (x,y) = cells !! y !! x
+getCell (Board (x:xs)) t = if t == getCellCoordinates x
+                           then x
+                           else getCell (Board xs) t
+getCell (Board [])     t = error "Could not find anything on empty board!"
 
 setCell :: (Int, Int) -> Cell -> Board -> Board
-setCell (x,y) cell (Board rows) = Board (replace y newRow rows)
+setCell (x,y) cell (Board cells) = Board (replace (x,y) cell cells)
   -- Replace list element function.
-  where replace :: Int -> a -> [a] -> [a]
-        replace n newElement xs = take n xs ++ [newElement] ++ drop (n + 1) xs
-        newRow = replace x cell (rows !! y)
+  where replace :: (Int, Int) -> Cell -> [Cell] -> [Cell]
+        replace t newElement (x:xs) = if t == getCellCoordinates x
+                                      then newElement : xs 
+                                      else x : replace t newElement xs
+        replace _ _           []    = error "Could not replace element on empty board!"
 
 isNothingCell :: Cell -> Bool
-isNothingCell (Cell _ mbp) = isNothing mbp
+isNothingCell (Cell _ _ mbp) = isNothing mbp
 
 -- Game type functions.
 getGameState :: Game -> State
@@ -183,7 +196,7 @@ isGameFinished (Game _ state) = state `elem` [ Draw
 
 -- Transform game state function.
 isMoveAllowed :: Cell -> Cell -> (Int, Int, Int, Int) -> Bool
-isMoveAllowed (Cell _ _) destCell move@(x,y,x',y') = False --TODO restrict moves for specific pieces
+isMoveAllowed _ destCell move@(x,y,x',y') = True --TODO restrict moves for specific pieces
 
 
 transformGame :: Game -> (Int, Int, Int, Int) -> Game
@@ -193,20 +206,22 @@ transformGame game@(Game board state) move@(x,y,x',y') = Game (transformBoard bo
                                       then Move (switchColor color)
                                       else Move color
         transformState state        = state
-
         maybePieceColorOnSrcCell = getMaybePieceColor (getCellPiece srcCell)
         srcCell                  = getCell board (x,  y )
         destCell                 = getCell board (x', y')
 
         -- TODO checks, checkmates and draws
-        transformBoard board (Move color) = if ( isNothingCell srcCell ||
-                                                 Just color /= maybePieceColorOnSrcCell )
-                                               && isMoveAllowed srcCell destCell move
+        transformBoard board (Move color) = if isNothingCell srcCell ||
+                                               Just color /= maybePieceColorOnSrcCell ||
+                                               not (isMoveAllowed srcCell destCell move)
                                             then board
                                             else setCell (x', y') newDestCell $
                                                  setCell (x,  y ) newSrcCell board
-                                            where newSrcCell  = emptyCell (getCellColor srcCell)
-                                                  newDestCell = Cell (getCellColor destCell) (getCellPiece srcCell)
+                                            where newSrcCell  = emptyCell (getCellCoordinates srcCell)
+                                                                          (getCellColor srcCell)
+                                                  newDestCell = Cell (getCellCoordinates destCell)
+                                                                     (getCellColor destCell)
+                                                                     (getCellPiece srcCell)
         transformBoard board _            = board
 
 makeMove :: Game -> (Int, Int, Int, Int) -> Game
