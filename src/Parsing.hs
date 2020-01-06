@@ -10,7 +10,7 @@ import Data.Maybe (fromMaybe)
 parseColor :: String -> Maybe Color
 parseColor s
   | 'w' == toLower (head s) = Just White
-  | 'b' == toLower (head s) = Just White
+  | 'b' == toLower (head s) = Just Black
   | otherwise = Nothing
 
 -- Convert string to tuple of four integers where
@@ -21,10 +21,10 @@ parseMove :: String -> (Int, Int, Int, Int)
 parseMove []          = error "Could not parse move from empty string!"
 parseMove (a:b:c:d:_) = ( fromMaybe (error $ errMessage a) $
                           elemIndex (toLower a) ['a' .. 'h']
-                        , 9 - transformAndCheck b
+                        , 8 - transformAndCheck b
                         , fromMaybe (error $ errMessage c) $
                           elemIndex (toLower c) ['a' .. 'h']
-                        , 9 - transformAndCheck d )
+                        , 8 - transformAndCheck d )
   where errMessage char = "Could not parse coordinate '"
                           ++ [char] ++ "'!"
         transformAndCheck char = if 1 <= intCoordinate && intCoordinate <= 8
