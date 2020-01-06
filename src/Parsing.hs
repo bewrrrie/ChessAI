@@ -21,10 +21,10 @@ parseMove :: String -> (Int, Int, Int, Int)
 parseMove []          = error "Could not parse move from empty string!"
 parseMove (a:b:c:d:_) = ( fromMaybe (error $ errMessage a) $
                           elemIndex (toLower a) ['a' .. 'h']
-                        , 8 - transformAndCheck b
+                        , 9 - transformAndCheck b
                         , fromMaybe (error $ errMessage c) $
                           elemIndex (toLower c) ['a' .. 'h']
-                        , 8 - transformAndCheck d )
+                        , 9 - transformAndCheck d )
   where errMessage char = "Could not parse coordinate '"
                           ++ [char] ++ "'!"
         transformAndCheck char = if 1 <= intCoordinate && intCoordinate <= 8
