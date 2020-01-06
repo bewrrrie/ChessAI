@@ -17,19 +17,17 @@ parseColor s
 -- first two integers are coordinates of pieces that is going to be moved
 -- and second pair of integers are coordinates of square where is the piece
 -- going to be placed after move.
-parseMove :: String -> (Int, Int, Int, Int)
-parseMove []          = error "Could not parse move from empty string!"
-parseMove (a:b:c:d:_) = ( fromMaybe (error $ errMessage a) $
-                          elemIndex (toLower a) ['a' .. 'h']
-                        , 8 - transformAndCheck b
-                        , fromMaybe (error $ errMessage c) $
-                          elemIndex (toLower c) ['a' .. 'h']
-                        , 8 - transformAndCheck d )
+parseMove :: String -> (Maybe Int, Maybe Int, Maybe Int, Maybe Int)
+parseMove []          = (Nothing, Nothing, Nothing, Nothing)
+parseMove (a:b:c:d:_) = ( elemIndex (toLower a) ['a' .. 'h']
+                        , transformAndCheck b
+                        , elemIndex (toLower c) ['a' .. 'h']
+                        , transformAndCheck d )
   where errMessage char = "Could not parse coordinate '"
                           ++ [char] ++ "'!"
         transformAndCheck char = if 1 <= intCoordinate && intCoordinate <= 8
-                                 then intCoordinate
-                                 else error (errMessage char)
+                                 then Just (8 - intCoordinate)
+                                 else Nothing
           where intCoordinate = (read::String->Int) [char]
 
 -- Check if command to quit was written
