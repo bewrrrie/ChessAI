@@ -20,7 +20,10 @@ import ChessAI  ( aiDecide  )
 
 -- | Random seed transformation function.
 rnd :: Int -> Int
-rnd seed = (937 * seed + 11113) `mod` 128
+rnd seed = (a * seed + c) `mod` m
+  where a = 32 * 8191 + 1
+        c = 3921
+        m = 64
 
 getAIDecision :: Int -> Game -> Color -> Move
 getAIDecision = aiDecide rnd
@@ -66,8 +69,8 @@ playChess seed = do { hSetBuffering stdout NoBuffering
                     ; if   parseQuit cmd
                       then putStrLn "Finishing game process..."
                       else do { let playerColor = parseColor cmd
-                              ; gameLoop  seed
-                                         (if   isNothing playerColor
-                                          then Just White
-                                          else playerColor)
-                                          initialGame } }
+                              ; gameLoop   seed
+                                         ( if   isNothing playerColor
+                                           then Just White
+                                           else playerColor )
+                                           initialGame } }
