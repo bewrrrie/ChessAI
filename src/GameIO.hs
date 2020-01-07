@@ -6,7 +6,7 @@ import Data.Maybe ( fromMaybe
                   , isNothing )
 
 import ChessLib ( Game
-                , Color
+                , Color (..)
                 , Move
                 , getMoveColor
                 , getGameState
@@ -58,4 +58,6 @@ playChess = do { hSetBuffering stdout NoBuffering
                ; if   parseQuit cmd
                  then putStrLn "Finishing game process..."
                  else do { let playerColor = parseColor cmd
-                         ; gameLoop playerColor initialGame } }
+                         ; gameLoop (if isNothing playerColor
+                                     then Just White
+                                     else playerColor) initialGame } }
