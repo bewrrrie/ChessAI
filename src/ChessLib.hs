@@ -129,7 +129,7 @@ initialBoard = Board [placePiece (k `mod` 8) (k `div` 8) | k <- [0..63]]
 
         maybePiece _ _ = Nothing
 
--- Initial game state.
+-- Initial game.
 initialGame = Game initialBoard (Move White)
 
 -- Piece functions.
@@ -163,14 +163,14 @@ switchColor White = Black
 switchMaybeColor :: Maybe Color -> Maybe Color
 switchMaybeColor (Just Black) = Just White
 switchMaybeColor (Just White) = Just Black
-switchMaybeColor Nothing = Nothing
+switchMaybeColor Nothing      = Nothing
 
 -- Game board functions.
 getCellCoordinates :: Cell -> CellCoords
 getCellCoordinates (Cell t _ _) = t
 
 getCell :: Board -> CellCoords -> Cell
-getCell (Board (x:xs)) t = if t == getCellCoordinates x
+getCell (Board (x:xs)) t = if   t == getCellCoordinates x
                            then x
                            else getCell (Board xs) t
 getCell (Board [])     t = error "Could not find anything on empty board!"
@@ -212,7 +212,7 @@ setCell :: CellCoords -> Cell -> Board -> Board
 setCell (x,y) cell (Board cells) = Board (replace (x,y) cell cells)
   -- Replace list element function.
   where replace :: CellCoords -> Cell -> [Cell] -> [Cell]
-        replace t newElement (x:xs) = if t == getCellCoordinates x
+        replace t newElement (x:xs) = if   t == getCellCoordinates x
                                       then newElement : xs 
                                       else x : replace t newElement xs
         replace _ _           []    = error "Could not replace element on empty board!"
