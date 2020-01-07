@@ -5,6 +5,7 @@ My implementation of ASCII chess game with opponent AI.
 ### Current goals
 - [x] Implement chess board and pieces
 - [X] Implement pieces moves
+- [X] Create opponent that moves pieces randomly
 - [ ] Implement checks, checkmates and draws
 - [ ] Implement game history output to file
 - [ ] Implement opponent AI using minimax criteria ([freecodecamp article](https://www.freecodecamp.org/news/simple-chess-ai-step-by-step-1d55a9266977/), [arXiv:1404.1515](https://arxiv.org/abs/1404.1515), [arXiv:1208.1940](https://arxiv.org/abs/1208.1940))
