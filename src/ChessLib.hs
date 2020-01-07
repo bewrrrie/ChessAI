@@ -139,6 +139,12 @@ getMaybePieceColor :: Maybe Piece -> Maybe Color
 getMaybePieceColor (Just (Piece color _)) = Just color
 getMaybePieceColor Nothing = Nothing
 
+getPieceColor :: Piece -> Color
+getPieceColor (Piece color _) = color
+
+getPieceType :: Piece -> PieceType
+getPieceType (Piece _ pieceType) = pieceType
+
 -- Cell functions.
 emptyCell :: CellCoords -> Color -> Cell
 emptyCell t color = Cell t color Nothing
@@ -243,40 +249,44 @@ isGameFinished (Game _ state) = state `elem` [ Draw
                                              , CheckMate Black ]
 
 -- Transform game state function.
-isMoveAllowed :: Color -> Maybe Piece -> Board -> Move -> Bool
-isMoveAllowed _          Nothing                            _                   _                = False
-isMoveAllowed moveColor (Just (Piece pieceColor pieceType)) board@(Board cells) move@(x,y,x',y') =
-  moveColor == pieceColor && case (moveColor, pieceType) of
-    (White, Pawn) -> ( if   y  == 6
-                       then dx == 0 && 0 > dy && dy > -3
-                       else dx == 0 && 0 > dy && dy > -2
-                  &&   isNothing destMaybePiece && isCleanRoute (buildRoute board move) )
-                  || ( isJust destMaybePiece && (moveColor /= destPieceColor) && dy == -1 && absDx == 1 )
-    (Black, Pawn) -> ( if   y  == 1
-                       then dx == 0 && 0 < dy && dy < 3
-                       else dx == 0 && 0 < dy && dy < 2
-                  &&   isNothing destMaybePiece && isCleanRoute (buildRoute board move) )
-                  || ( isJust destMaybePiece && (moveColor /= destPieceColor) && dy == 1 && absDx == 1 )
-    (_, Rook  )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
-                  && isCleanRoute (buildRoute board move) && (abs (x - x') == 0 || abs (y - y') == 0)
-    (_, Knight)   -> ( isNothing destMaybePiece || destPieceColor /= moveColor ) && l1Dist == 3
-    (_, Bishop)   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
-                  && isCleanRoute (buildRoute board move) && absDx == absDy
-    (_, King  )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
-                  && isCleanRoute (buildRoute board move) && 0 < l1Dist && l1Dist < 3
-    (_, Queen )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
-                  && isCleanRoute (buildRoute board move) && ( absDx == absDy
-                                                            || 0 < l1Dist && l1Dist < 3
-                                                            || absDx == 0
-                                                            || absDy == 0 )
-  where destMaybePiece = getCellPiece $ getCell board (x',y')
-        destPieceColor = fromMaybe (error "Could not get piece color because cell was empty!")
-                                   (getMaybePieceColor destMaybePiece)
-        l1Dist = abs (x - x') + abs (y - y')
-        dx     = x' - x
-        dy     = y' - y
-        absDx  = abs dx
-        absDy  = abs dy
+isMoveAllowed :: Color -> Board -> Move -> Bool
+isMoveAllowed moveColor board@(Board cells) move@(x,y,x',y') =
+  isJust sourceMaybePiece && moveColor == pieceColor && case (moveColor, pieceType) of
+         (White, Pawn) -> ( if   y  == 6
+                            then dx == 0 && 0 > dy && dy > -3
+                            else dx == 0 && 0 > dy && dy > -2
+                       &&   isNothing destMaybePiece && isCleanRoute (buildRoute board move) )
+                       || ( isJust destMaybePiece && (moveColor /= destPieceColor) && dy == -1 && absDx == 1 )
+         (Black, Pawn) -> ( if   y  == 1
+                            then dx == 0 && 0 < dy && dy < 3
+                            else dx == 0 && 0 < dy && dy < 2
+                       &&   isNothing destMaybePiece && isCleanRoute (buildRoute board move) )
+                       || ( isJust destMaybePiece && (moveColor /= destPieceColor) && dy == 1 && absDx == 1 )
+         (_, Rook  )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
+                         && isCleanRoute (buildRoute board move) && (abs (x - x') == 0 || abs (y - y') == 0)
+         (_, Knight)   -> ( isNothing destMaybePiece || destPieceColor /= moveColor ) && l1Dist == 3
+         (_, Bishop)   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
+                         && isCleanRoute (buildRoute board move) && absDx == absDy
+         (_, King  )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
+                         && isCleanRoute (buildRoute board move) && 0 < l1Dist && l1Dist < 3
+         (_, Queen )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
+                         && isCleanRoute (buildRoute board move) && ( absDx == absDy
+                                                                   || 0 < l1Dist && l1Dist < 3
+                                                                   || absDx == 0
+                                                                   || absDy == 0 )
+    where sourceMaybePiece = getCellPiece  $ getCell board (x, y)
+          pieceType        = getPieceType  $ fromMaybe (error "Could not get piece type of Nothing!")
+                                             sourceMaybePiece
+          pieceColor       = getPieceColor $ fromMaybe (error "Could not get piece color of Nothing!")
+                                             sourceMaybePiece
+          destMaybePiece   = getCellPiece  $ getCell board (x',y')
+          destPieceColor   = fromMaybe (error "Could not get piece color because cell was empty!")
+                                       (getMaybePieceColor destMaybePiece)
+          l1Dist = abs (x - x') + abs (y - y')
+          dx     = x' - x
+          dy     = y' - y
+          absDx  = abs dx
+          absDy  = abs dy
 
 
 transformGame :: Game -> Move -> Game
@@ -300,7 +310,7 @@ transformGame game@(Game board state) move@(x,y,x',y') = Game (transformBoard bo
                                                                            (getCellPiece srcCell)
         transformBoard board _                  = board
         canMove move@(x,y,x',y') (Move color)   = abs (x - x') + abs (y - y') > 0 &&
-                                                  isMoveAllowed color (getCellPiece srcCell) board move
+                                                  isMoveAllowed color board move
 
 makeMove :: Game -> Move -> Game
 makeMove game@(Game board (CheckMate White)) _ = game
