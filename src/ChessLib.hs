@@ -1,6 +1,8 @@
 module ChessLib where
 
-import Data.Maybe(isNothing, fromMaybe, isJust)
+import Data.Maybe ( isNothing
+                  , fromMaybe
+                  , isJust )
 
 -- Chess piece type.
 data Color = White | Black deriving (Eq, Show)
