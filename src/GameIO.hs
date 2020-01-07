@@ -2,10 +2,12 @@ module GameIO where
 
 import System.IO
 import Control.Monad
-import Data.Maybe (fromMaybe, isNothing)
+import Data.Maybe ( fromMaybe
+                  , isNothing )
 
 import ChessLib ( Game
                 , Color
+                , Move
                 , getMoveColor
                 , getGameState
                 , isGameFinished
@@ -19,13 +21,12 @@ import ChessAI  ( aiDecide  )
 -- Piece move inference function.
 -- If it is our turn we parse the move from cmd
 -- otherwise if it is AI's turn move must be inferred by minimax algorithm.
-inferMove :: Game -> Maybe Color -> Maybe Color -> String -> (Int, Int, Int, Int)
+inferMove :: Game -> Maybe Color -> Maybe Color -> String -> Move
 inferMove _    Nothing     _                      _   = error "Move color is Nothing!"
 inferMove _    _           Nothing                _   = error "Move color is Nothing!"
-inferMove game playerColor moveColor@(Just color) cmd = if moveColor == playerColor
+inferMove game playerColor moveColor@(Just color) cmd = if   moveColor == playerColor
                                                         then unpackParsedMove $ parseMove cmd
-                                                        else unpackParsedMove $ parseMove cmd
-                                                        -- TODO replace else option with `aiDecide game color`
+                                                        else aiDecide game color
   where unpackParsedMove (Nothing,_,_,_)                 = (0,0,0,0)
         unpackParsedMove (_,Nothing,_,_)                 = (0,0,0,0)
         unpackParsedMove (_,_,Nothing,_)                 = (0,0,0,0)
@@ -56,6 +57,5 @@ playChess = do { hSetBuffering stdout NoBuffering
                ; cmd <- getLine
                ; if parseQuit cmd
                  then putStrLn "Finishing game process..."
-                 else do {
-                         ; let playerColor = parseColor cmd
+                 else do { let playerColor = parseColor cmd
                          ; gameLoop playerColor initialGame } }
