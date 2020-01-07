@@ -53,7 +53,7 @@ instance Show Board where
           showLowerBorder       = " ┗" ++ concat    (replicate 7 "━┷")               ++ "━┛\n"
           showRowsSplitter      = " ┠" ++ concat    (replicate 7 "─┼")               ++ "─┨\n"
           showCells []     _    = ""
-          showCells (c:cs) 1    = "┃" ++ show c ++ "┃"
+          showCells (c:cs) 1    = "│" ++ show c ++ "┃"
                                       ++ show (8 - (snd . getCellCoordinates) c) -- invert Y coordinate
                                       ++ "\n"
                                       ++ ( if   (snd . getCellCoordinates) c < 7
@@ -62,7 +62,7 @@ instance Show Board where
                                       ++ showCells cs 8
           showCells (c:cs) 8    = show (8 - (snd . getCellCoordinates) c) ++
                                   "┃" ++ show c ++ showCells cs 7
-          showCells (c:cs) n    = "┃" ++ show c ++ showCells cs (n-1)
+          showCells (c:cs) n    = "│" ++ show c ++ showCells cs (n-1)
 
 
 -- Chess game state type.
