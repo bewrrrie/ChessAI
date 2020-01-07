@@ -37,15 +37,15 @@ inferMove game playerColor moveColor@(Just color) cmd = if   moveColor == player
 gameLoop :: Maybe Color -> Game -> IO ()
 gameLoop playerColor game = do { print game
                                ; let maybeMoveColor = getMoveColor (getGameState game)
-                               ; if maybeMoveColor == playerColor
+                               ; if   maybeMoveColor == playerColor
                                  then putStr "Make your move: "
                                  else putStr "AI is going to make its decision."
                                ; cmd <- getLine
-                               ; if isNothing maybeMoveColor || parseQuit cmd
+                               ; if   isNothing maybeMoveColor || parseQuit cmd
                                  then putStrLn "Finishing game process..."
                                  else do { let move = inferMove game playerColor maybeMoveColor cmd
                                          ; let newGame = makeMove game move
-                                         ; if isGameFinished newGame
+                                         ; if   isGameFinished newGame
                                            then putStrLn "Game is finished.\nFinishing game process..."
                                            else gameLoop playerColor newGame } }
 
@@ -55,7 +55,7 @@ playChess :: IO ()
 playChess = do { hSetBuffering stdout NoBuffering
                ; putStr "Select color ('B'/'W' or 'q' to quit): "
                ; cmd <- getLine
-               ; if parseQuit cmd
+               ; if   parseQuit cmd
                  then putStrLn "Finishing game process..."
                  else do { let playerColor = parseColor cmd
                          ; gameLoop playerColor initialGame } }
