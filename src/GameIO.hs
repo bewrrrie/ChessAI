@@ -58,6 +58,6 @@ playChess = do { hSetBuffering stdout NoBuffering
                ; if   parseQuit cmd
                  then putStrLn "Finishing game process..."
                  else do { let playerColor = parseColor cmd
-                         ; gameLoop (if isNothing playerColor
+                         ; gameLoop (if   isNothing playerColor
                                      then Just White
                                      else playerColor) initialGame } }
