@@ -60,8 +60,8 @@ gameLoop seed playerColor game = do { print game
                                                 then putStrLn "Game is finished.\nFinishing game process..."
                                                 else gameLoop newSeed playerColor newGame } }
 
--- IO function for reading input and getting output.
--- Main entry point to start the game.
+-- | IO function for reading input and getting output.
+--   Main entry point to start the game.
 playChess :: Int ->  IO ()
 playChess seed = do { hSetBuffering stdout NoBuffering
                     ; putStr "Select color ('B'/'W' or 'q' to quit): "
