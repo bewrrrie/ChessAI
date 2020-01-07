@@ -34,4 +34,5 @@ parseMove _           = (Nothing, Nothing, Nothing, Nothing)
 
 -- Check if command to quit was written
 parseQuit :: String -> Bool
-parseQuit = (== 'q') . toLower . head
+parseQuit [] = False
+parseQuit s  = ((== 'q') . toLower . head) s
