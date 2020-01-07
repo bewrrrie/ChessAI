@@ -27,7 +27,9 @@ instance Show Piece where
   show (Piece Black King)   = "♚"
 
 -- Game board cell type.
-data Cell = Cell (Int,Int) Color (Maybe Piece) deriving (Eq)
+type CellCoords = (Int,Int)
+type Move = (Int,Int,Int,Int)
+data Cell = Cell CellCoords Color (Maybe Piece) deriving (Eq)
 
 instance Show Cell where
   show (Cell _ _ (Just piece)) = show piece
@@ -136,7 +138,7 @@ getMaybePieceColor (Just (Piece color _)) = Just color
 getMaybePieceColor Nothing = Nothing
 
 -- Cell functions.
-emptyCell :: (Int,Int) -> Color -> Cell
+emptyCell :: CellCoords -> Color -> Cell
 emptyCell t color = Cell t color Nothing
 
 getCellColor :: Cell -> Color
@@ -164,10 +166,10 @@ switchMaybeColor (Just White) = Just Black
 switchMaybeColor Nothing = Nothing
 
 -- Game board functions.
-getCellCoordinates :: Cell -> (Int,Int)
+getCellCoordinates :: Cell -> CellCoords
 getCellCoordinates (Cell t _ _) = t
 
-getCell :: Board -> (Int,Int) -> Cell
+getCell :: Board -> CellCoords -> Cell
 getCell (Board (x:xs)) t = if t == getCellCoordinates x
                            then x
                            else getCell (Board xs) t
@@ -177,33 +179,39 @@ getCell (Board [])     t = error "Could not find anything on empty board!"
 type Route = [Cell]
 
 -- Find vertical, horizontal or diagonal route function.
--- Starting and finishing cells will be excluded.
-buildRoute :: Board -> (Int,Int,Int,Int) -> Route
-buildRoute board move@(x,y,x',y') | x==x' && y==y'           = []
-                                  | x==x'                    = tail $ buildVerticalRoute   board move
-                                  | y==y'                    = tail $ buildHorizontalRoute board move
-                                  | abs (x-x') == abs (y-y') = tail $ buildDiagonalRoute   board move
-                                  | otherwise                = [] -- Only straight diagonal routes are allowed!
-  where buildVerticalRoute   board (x,y,x',y') | y'-y > 0   = cell : buildVerticalRoute board (x,y+1,x',y')
-                                               | y'-y < 0   = cell : buildVerticalRoute board (x,y-1,x',y')
-                                               | otherwise  = [] where cell = getCell board (x,y)
-        buildHorizontalRoute board (x,_,x',_ ) | x'-x > 0   = cell : buildHorizontalRoute board (x+1,y,x',y')
-                                               | x'-x < 0   = cell : buildHorizontalRoute board (x-1,y,x',y')
-                                               | otherwise  = [] where cell = getCell board (x,y)
-        buildDiagonalRoute   board (x,y,x',y') | y'-y > 0 && x'-x > 0 = cell : buildDiagonalRoute board (x+1,y+1,x',y')
-                                               | y'-y < 0 && x'-x > 0 = cell : buildDiagonalRoute board (x+1,y-1,x',y')
-                                               | y'-y > 0 && x'-x < 0 = cell : buildDiagonalRoute board (x-1,y+1,x',y')
-                                               | y'-y < 0 && x'-x < 0 = cell : buildDiagonalRoute board (x-1,y-1,x',y')
-                                               | otherwise  = [] where cell = getCell board (x,y)
+-- Finishing cell will be excluded.
+buildVerticalRoute :: Board -> Move -> Route
+buildVerticalRoute board (x,y,x',y') | y'-y > 0  = cell : buildVerticalRoute board (x,y+1,x',y')
+                                     | y'-y < 0  = cell : buildVerticalRoute board (x,y-1,x',y')
+                                     | otherwise = [] where cell = getCell board (x,y)
+
+buildHorizontalRoute :: Board -> Move -> Route
+buildHorizontalRoute board (x,y,x',y') | x'-x > 0  = cell : buildHorizontalRoute board (x+1,y,x',y')
+                                       | x'-x < 0  = cell : buildHorizontalRoute board (x-1,y,x',y')
+                                       | otherwise = [] where cell = getCell board (x,y)
+
+buildDiagonalRoute :: Board -> Move -> Route
+buildDiagonalRoute board (x,y,x',y') | y'-y > 0 && x'-x > 0 = cell : buildDiagonalRoute board (x+1,y+1,x',y')
+                                     | y'-y < 0 && x'-x > 0 = cell : buildDiagonalRoute board (x+1,y-1,x',y')
+                                     | y'-y > 0 && x'-x < 0 = cell : buildDiagonalRoute board (x-1,y+1,x',y')
+                                     | y'-y < 0 && x'-x < 0 = cell : buildDiagonalRoute board (x-1,y-1,x',y')
+                                     | otherwise            = [] where cell = getCell board (x,y)
+
+-- Build route excluding starting and finishing cells.
+buildRoute :: Board -> Move -> Route
+buildRoute board move@(x,y,x',y') | x == x' && y /= y'           = tail $ buildVerticalRoute   board move
+                                  | y == y' && x /= x'           = tail $ buildHorizontalRoute board move
+                                  | abs (x - x') == abs (y - y') = tail $ buildDiagonalRoute   board move
+                                  | otherwise                    = [] -- Only straight diagonal routes are allowed!
 
 -- Check if route is clean.
 isCleanRoute :: Route -> Bool
 isCleanRoute = foldr ((&&) . isCellNothing) True
 
-setCell :: (Int,Int) -> Cell -> Board -> Board
+setCell :: CellCoords -> Cell -> Board -> Board
 setCell (x,y) cell (Board cells) = Board (replace (x,y) cell cells)
   -- Replace list element function.
-  where replace :: (Int,Int) -> Cell -> [Cell] -> [Cell]
+  where replace :: CellCoords -> Cell -> [Cell] -> [Cell]
         replace t newElement (x:xs) = if t == getCellCoordinates x
                                       then newElement : xs 
                                       else x : replace t newElement xs
@@ -222,7 +230,7 @@ isGameFinished (Game _ state) = state `elem` [ Draw
                                              , CheckMate Black ]
 
 -- Transform game state function.
-isMoveAllowed :: Color -> Maybe Piece -> Board -> (Int,Int,Int,Int) -> Bool
+isMoveAllowed :: Color -> Maybe Piece -> Board -> Move -> Bool
 isMoveAllowed _          Nothing                            _                   _                = False
 isMoveAllowed moveColor (Just (Piece pieceColor pieceType)) board@(Board cells) move@(x,y,x',y') =
   moveColor == pieceColor && case (moveColor, pieceType) of
@@ -258,7 +266,7 @@ isMoveAllowed moveColor (Just (Piece pieceColor pieceType)) board@(Board cells) 
         absDy  = abs dy
 
 
-transformGame :: Game -> (Int,Int,Int,Int) -> Game
+transformGame :: Game -> Move -> Game
 transformGame game@(Game board state) move@(x,y,x',y') = Game (transformBoard board state)
                                                               (transformState state)
   where transformState state@(Move color) = if   canMove move state
@@ -281,7 +289,7 @@ transformGame game@(Game board state) move@(x,y,x',y') = Game (transformBoard bo
         canMove move@(x,y,x',y') (Move color)   = abs (x - x') + abs (y - y') > 0 &&
                                                   isMoveAllowed color (getCellPiece srcCell) board move
 
-makeMove :: Game -> (Int,Int,Int,Int) -> Game
+makeMove :: Game -> Move -> Game
 makeMove game@(Game board (CheckMate White)) _ = game
 makeMove game@(Game board (CheckMate Black)) _ = game
 makeMove game@(Game board Draw)              _ = game
