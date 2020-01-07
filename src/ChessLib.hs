@@ -163,12 +163,12 @@ getMoveColor :: State -> Maybe Color
 getMoveColor (Move color) = Just color
 getMoveColor _            = Nothing
 
--- Switch color to opposite function
+-- | Switch color to opposite.
 switchColor :: Color -> Color
 switchColor Black = White
 switchColor White = Black
 
--- Switch color wrapped with Maybe.
+-- | Switch color wrapped with Maybe to opposite.
 switchMaybeColor :: Maybe Color -> Maybe Color
 switchMaybeColor (Just Black) = Just White
 switchMaybeColor (Just White) = Just Black
@@ -200,18 +200,22 @@ boardSize (Board cells) = length cells
 -- Route on game board type
 type Route = [Cell]
 
--- Find vertical, horizontal or diagonal route function.
--- Finishing cell will be excluded.
+-- | Find vertical route.
+--   Finishing cell will be excluded.
 buildVerticalRoute :: Board -> Move -> Route
 buildVerticalRoute board (x,y,x',y') | y'-y > 0  = cell : buildVerticalRoute board (x,y+1,x',y')
                                      | y'-y < 0  = cell : buildVerticalRoute board (x,y-1,x',y')
                                      | otherwise = [] where cell = getCell board (x,y)
 
+-- | Find horizontal route.
+--   Finishing cell will be excluded.
 buildHorizontalRoute :: Board -> Move -> Route
 buildHorizontalRoute board (x,y,x',y') | x'-x > 0  = cell : buildHorizontalRoute board (x+1,y,x',y')
                                        | x'-x < 0  = cell : buildHorizontalRoute board (x-1,y,x',y')
                                        | otherwise = [] where cell = getCell board (x,y)
 
+-- | Find diagonal route.
+--   Finishing cell will be excluded.
 buildDiagonalRoute :: Board -> Move -> Route
 buildDiagonalRoute board (x,y,x',y') | y'-y > 0 && x'-x > 0 = cell : buildDiagonalRoute board (x+1,y+1,x',y')
                                      | y'-y < 0 && x'-x > 0 = cell : buildDiagonalRoute board (x+1,y-1,x',y')
@@ -219,14 +223,17 @@ buildDiagonalRoute board (x,y,x',y') | y'-y > 0 && x'-x > 0 = cell : buildDiagon
                                      | y'-y < 0 && x'-x < 0 = cell : buildDiagonalRoute board (x-1,y-1,x',y')
                                      | otherwise            = [] where cell = getCell board (x,y)
 
--- Build route excluding starting and finishing cells.
+-- | Build route excluding starting and finishing cells.
+--   Based on given move.
+--   Non-diagonal, non-vertical and non-horizontal routes will be ignored
+--   and will lead to empty route as result.
 buildRoute :: Board -> Move -> Route
 buildRoute board move@(x,y,x',y') | x == x' && y /= y'           = tail $ buildVerticalRoute   board move
                                   | y == y' && x /= x'           = tail $ buildHorizontalRoute board move
                                   | abs (x - x') == abs (y - y') = tail $ buildDiagonalRoute   board move
                                   | otherwise                    = [] -- Only straight diagonal routes are allowed!
 
--- Check if route is clean.
+-- | Check if given route is clean.
 isCleanRoute :: Route -> Bool
 isCleanRoute = foldr ((&&) . isCellNothing) True
 
@@ -254,7 +261,11 @@ isGameFinished (Game _ state) = state `elem` [ Draw
                                              , CheckMate White
                                              , CheckMate Black ]
 
--- Transform game state function.
+-- Transform game state functions.
+-- | Check if specified move is allowed by game logic.
+--   Color is a pieces color of player that going to make a move.
+--   Board is a given game board state.
+--   Move  is a tuple of four integers (Int,Int,Int,Int)
 isMoveAllowed :: Color -> Board -> Move -> Bool
 isMoveAllowed moveColor board@(Board cells) move@(x,y,x',y') =
   isJust sourceMaybePiece && moveColor == pieceColor && case (moveColor, pieceType) of
@@ -319,6 +330,8 @@ transformGame game@(Game board state) move@(x,y,x',y') = Game (transformBoard bo
         canMove move@(x,y,x',y') (Move color)   = abs (x - x') + abs (y - y') > 0 &&
                                                   isMoveAllowed color board move
 
+-- | Function that encapsulate all chess moves logic.
+--   Used for whole game state transformation.
 makeMove :: Game -> Move -> Game
 makeMove game@(Game board (CheckMate White)) _ = game
 makeMove game@(Game board (CheckMate Black)) _ = game
