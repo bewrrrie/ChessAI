@@ -162,6 +162,7 @@ switchColor :: Color -> Color
 switchColor Black = White
 switchColor White = Black
 
+-- Switch color wrapped with Maybe.
 switchMaybeColor :: Maybe Color -> Maybe Color
 switchMaybeColor (Just Black) = Just White
 switchMaybeColor (Just White) = Just Black
@@ -176,6 +177,13 @@ getCell (Board (x:xs)) t = if   t == getCellCoordinates x
                            then x
                            else getCell (Board xs) t
 getCell (Board [])     t = error "Could not find anything on empty board!"
+
+filterBoard :: (Cell -> Bool) -> Board -> Board
+filterBoard _    (Board [])             = Board []
+filterBoard pred (Board (cell:cells))   = if   pred cell
+                                          then appendCell (filterBoard pred (Board cells)) cell
+                                          else filterBoard pred (Board cells)
+  where appendCell (Board cells_) cell_ = Board (cell_ : cells_)
 
 -- Route on game board type
 type Route = [Cell]
@@ -223,6 +231,9 @@ isCellNothing :: Cell -> Bool
 isCellNothing (Cell _ _ mbp) = isNothing mbp
 
 -- Game type functions.
+getGameBoard :: Game -> Board
+getGameBoard (Game board _) = board
+
 getGameState :: Game -> State
 getGameState (Game _ state) = state
 
