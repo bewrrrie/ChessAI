@@ -261,26 +261,27 @@ isMoveAllowed moveColor board@(Board cells) move@(x,y,x',y') =
          (White, Pawn) -> ( if   y  == 6
                             then dx == 0 && 0 > dy && dy > -3
                             else dx == 0 && 0 > dy && dy > -2
-                       &&   isNothing destMaybePiece && isCleanRoute (buildRoute board move) )
+                       &&   isNothing destMaybePiece && isCleanRoute route )
                        || ( isJust destMaybePiece && (moveColor /= destPieceColor) && dy == -1 && absDx == 1 )
          (Black, Pawn) -> ( if   y  == 1
                             then dx == 0 && 0 < dy && dy < 3
                             else dx == 0 && 0 < dy && dy < 2
-                       &&   isNothing destMaybePiece && isCleanRoute (buildRoute board move) )
+                       &&   isNothing destMaybePiece && isCleanRoute route )
                        || ( isJust destMaybePiece && (moveColor /= destPieceColor) && dy == 1 && absDx == 1 )
          (_, Rook  )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
-                         && isCleanRoute (buildRoute board move) && (abs (x - x') == 0 || abs (y - y') == 0)
+                         && isCleanRoute route && (abs (x - x') == 0 || abs (y - y') == 0)
          (_, Knight)   -> ( isNothing destMaybePiece || destPieceColor /= moveColor ) && l1Dist == 3
          (_, Bishop)   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
-                         && isCleanRoute (buildRoute board move) && absDx == absDy
+                         && isCleanRoute route && absDx == absDy
          (_, King  )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
-                         && isCleanRoute (buildRoute board move) && 0 < l1Dist && l1Dist < 3
+                         && isCleanRoute route && 0 < l1Dist && l1Dist < 3
          (_, Queen )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
-                         && isCleanRoute (buildRoute board move) && ( absDx == absDy
+                         && isCleanRoute route && ( absDx == absDy
                                                                    || 0 < l1Dist && l1Dist < 3
                                                                    || absDx == 0
                                                                    || absDy == 0 )
-    where sourceMaybePiece = getCellPiece  $ getCell board (x, y)
+    where route            = buildRoute board move
+          sourceMaybePiece = getCellPiece  $ getCell board (x, y)
           pieceType        = getPieceType  $ fromMaybe (error "Could not get piece type of Nothing!")
                                              sourceMaybePiece
           pieceColor       = getPieceColor $ fromMaybe (error "Could not get piece color of Nothing!")
