@@ -18,18 +18,20 @@ parseColor s
 -- and second pair of integers are coordinates of square where is the piece
 -- going to be placed after move.
 parseMove :: String -> (Maybe Int, Maybe Int, Maybe Int, Maybe Int)
-parseMove []          = (Nothing, Nothing, Nothing, Nothing)
 parseMove (a:b:c:d:_) = ( elemIndex (toLower a) ['a' .. 'h']
                         , transformAndCheck b
                         , elemIndex (toLower c) ['a' .. 'h']
                         , transformAndCheck d )
   where errMessage char = "Could not parse coordinate '"
                           ++ [char] ++ "'!"
-        transformAndCheck char = if 1 <= intCoordinate && intCoordinate <= 8
+        transformAndCheck char = if   1 <= intCoordinate && intCoordinate <= 8
                                  then Just (8 - intCoordinate)
                                  else Nothing
-          where intCoordinate = (read::String->Int) [char]
+          where intCoordinate = if    char `elem` ['1'..'8']
+                                then (read::String->Int) [char]
+                                else  -1
+parseMove _           = (Nothing, Nothing, Nothing, Nothing)
 
 -- Check if command to quit was written
 parseQuit :: String -> Bool
-parseQuit = (== 'q') . toLower . head 
+parseQuit = (== 'q') . toLower . head
