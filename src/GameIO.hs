@@ -22,7 +22,7 @@ import ChessAI  ( aiDecide  )
 -- If it is our turn we parse the move from cmd
 -- otherwise if it is AI's turn move must be inferred by minimax algorithm.
 inferMove :: Game -> Maybe Color -> Maybe Color -> String -> Move
-inferMove _    Nothing     _                      _   = error "Move color is Nothing!"
+inferMove _    Nothing     _                      _   = error "Player color is Nothing!"
 inferMove _    _           Nothing                _   = error "Move color is Nothing!"
 inferMove game playerColor moveColor@(Just color) cmd = if   moveColor == playerColor
                                                         then unpackParsedMove $ parseMove cmd
