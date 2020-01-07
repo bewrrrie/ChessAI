@@ -6,17 +6,17 @@ import Data.Char (toLower)
 import Data.Maybe (fromMaybe)
 
 -- Parsing functions.
--- Convert string to color type.
+-- | Convert string to color type.
 parseColor :: String -> Maybe Color
 parseColor s
   | 'w' == toLower (head s) = Just White
   | 'b' == toLower (head s) = Just Black
   | otherwise = Nothing
 
--- Convert string to tuple of four integers where
--- first two integers are coordinates of pieces that is going to be moved
--- and second pair of integers are coordinates of square where is the piece
--- going to be placed after move.
+-- | Convert string to tuple of four integers where
+--   first two integers are coordinates of pieces that is going to be moved
+--   and second pair of integers are coordinates of square where is the piece
+--   going to be placed after move.
 parseMove :: String -> (Maybe Int, Maybe Int, Maybe Int, Maybe Int)
 parseMove (a:b:c:d:_) = ( elemIndex (toLower a) ['a' .. 'h']
                         , transformAndCheck b
@@ -32,7 +32,7 @@ parseMove (a:b:c:d:_) = ( elemIndex (toLower a) ['a' .. 'h']
                                 else  -1
 parseMove _           = (Nothing, Nothing, Nothing, Nothing)
 
--- Check if command to quit was written
+-- | Check if command to quit was written correctly.
 parseQuit :: String -> Bool
 parseQuit [] = False
 parseQuit s  = ((== 'q') . toLower . head) s
