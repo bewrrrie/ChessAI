@@ -288,7 +288,6 @@ isMoveAllowed moveColor board@(Board cells) move@(x,y,x',y') =
           absDx  = abs dx
           absDy  = abs dy
 
-
 transformGame :: Game -> Move -> Game
 transformGame game@(Game board state) move@(x,y,x',y') = Game (transformBoard board state)
                                                               (transformState state)
