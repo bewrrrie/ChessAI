@@ -1,10 +1,9 @@
 module Main where
 
+import System.Random
+
 import GameIO
 
--- | Initial random seed.
-rndSeed :: Int
-rndSeed = 17
-
 main :: IO ()
-main = playChess rndSeed
+main = do { rnd <- randomRIO (1, 524287)
+          ; playChess rnd }
