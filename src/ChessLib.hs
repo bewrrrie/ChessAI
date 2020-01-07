@@ -191,6 +191,9 @@ filterBoard pred (Board (cell:cells))   = if   pred cell
                                           else filterBoard pred (Board cells)
   where appendCell (Board cells_) cell_ = Board (cell_ : cells_)
 
+boardSize :: Board -> Int
+boardSize (Board cell) = length cells
+
 -- Route on game board type
 type Route = [Cell]
 
