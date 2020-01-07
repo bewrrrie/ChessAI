@@ -270,7 +270,8 @@ isMoveAllowed moveColor board@(Board cells) move@(x,y,x',y') =
                   || ( isJust destMaybePiece && (moveColor /= destPieceColor) && dy == 1 && absDx == 1 )
     (_, Rook  )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
                     && isCleanRoute route && (abs (x - x') == 0 || abs (y - y') == 0)
-    (_, Knight)   -> ( isNothing destMaybePiece || destPieceColor /= moveColor ) && l1Dist == 3
+    (_, Knight)   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
+                    && l1Dist == 3 && absDx < 3 && absDy < 3
     (_, Bishop)   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
                     && isCleanRoute route && absDx == absDy
     (_, King  )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
