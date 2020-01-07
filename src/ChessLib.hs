@@ -178,6 +178,9 @@ switchMaybeColor Nothing      = Nothing
 getCellCoordinates :: Cell -> CellCoords
 getCellCoordinates (Cell t _ _) = t
 
+getMove :: Cell -> Cell -> Move
+getMove (Cell (x,y) _ _) (Cell (x',y') _ _) = (x,y,x',y')
+
 getCell :: Board -> CellCoords -> Cell
 getCell (Board (x:xs)) t = if   t == getCellCoordinates x
                            then x
@@ -192,7 +195,7 @@ filterBoard pred (Board (cell:cells))   = if   pred cell
   where appendCell (Board cells_) cell_ = Board (cell_ : cells_)
 
 boardSize :: Board -> Int
-boardSize (Board cell) = length cells
+boardSize (Board cells) = length cells
 
 -- Route on game board type
 type Route = [Cell]
