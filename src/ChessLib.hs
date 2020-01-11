@@ -268,7 +268,9 @@ isGameFinished (Game _ state) = state `elem` [ Draw
 --   Move  is a tuple of four integers (Int,Int,Int,Int)
 isMoveAllowed :: Color -> Board -> Move -> Bool
 isMoveAllowed moveColor board@(Board cells) move@(x,y,x',y') =
-  isJust sourceMaybePiece && moveColor == pieceColor && case (moveColor, pieceType) of
+  isJust sourceMaybePiece && moveColor == pieceColor
+                          && l1Dist > 0
+                          && case (moveColor, pieceType) of
     (White, Pawn) -> ( if   y  == 6
                        then dx == 0 && 0 > dy && dy > -3
                        else dx == 0 && 0 > dy && dy > -2
@@ -310,14 +312,14 @@ isMoveAllowed moveColor board@(Board cells) move@(x,y,x',y') =
 transformGame :: Game -> Move -> Game
 transformGame game@(Game board state) move@(x,y,x',y') = Game (transformBoard board state)
                                                               (transformState state)
-  where transformState state@(Move color) = if   canMove move state
+  where transformState state@(Move color) = if   isMoveAllowed color board move
                                             then Move (switchColor color) -- TODO add checks, checkmates and draws
                                             else state
         transformState state              = state
         maybePieceColorOnSrcCell = getMaybePieceColor (getCellPiece srcCell)
         srcCell                  = getCell board (x,  y )
         destCell                 = getCell board (x', y')
-        transformBoard board state@(Move color) = if   canMove move state
+        transformBoard board state@(Move color) = if   isMoveAllowed color board move
                                                   then setCell (x', y') newDestCell $
                                                        setCell (x,  y ) newSrcCell board
                                                   else board
@@ -327,8 +329,6 @@ transformGame game@(Game board state) move@(x,y,x',y') = Game (transformBoard bo
                                                                            (getCellColor destCell)
                                                                            (getCellPiece srcCell)
         transformBoard board _                  = board
-        canMove move@(x,y,x',y') (Move color)   = abs (x - x') + abs (y - y') > 0 &&
-                                                  isMoveAllowed color board move
 
 -- | Function that encapsulate all chess moves logic.
 --   Used for whole game state transformation.
