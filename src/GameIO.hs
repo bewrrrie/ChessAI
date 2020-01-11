@@ -16,22 +16,22 @@ import ChessLib ( Game
 import Parsing  ( parseMove
                 , parseColor
                 , parseQuit )
-import ChessAI  ( aiDecide  )
+import ChessAI  ( rndDecide  )
 
 -- | Random seed transformation function.
-rnd :: Int -> Int
-rnd seed = (a * seed + c) `mod` m
+nextRnd :: Integer -> Integer
+nextRnd seed = (a * seed + c) `mod` m
   where a = 32 * 8191 + 1
         c = 3921
         m = 64
 
-getAIDecision :: Int -> Game -> Color -> Move
-getAIDecision = aiDecide rnd
+getAIDecision :: Integer -> Game -> Color -> Move
+getAIDecision = rndDecide nextRnd
 
 -- | Piece move inference function.
 --   If it is our turn we parse the move from cmd
 --   otherwise if it is AI's turn move must be inferred by minimax algorithm.
-inferMove :: Int -> Game -> Maybe Color -> Maybe Color -> String -> Move
+inferMove :: Integer -> Game -> Maybe Color -> Maybe Color -> String -> Move
 inferMove _     _    Nothing     _                      _   = error "Player color is Nothing!"
 inferMove _     _    _           Nothing                _   = error "Move color is Nothing!"
 inferMove seed  game playerColor moveColor@(Just color) cmd = if   moveColor == playerColor
@@ -44,7 +44,7 @@ inferMove seed  game playerColor moveColor@(Just color) cmd = if   moveColor == 
         unpackParsedMove (Just x , Just y , Just x', Just y') = (x, y, x', y')
 
 -- Main game loop.
-gameLoop :: Int -> Maybe Color -> Game -> IO ()
+gameLoop :: Integer -> Maybe Color -> Game -> IO ()
 gameLoop seed playerColor game = do { print game
                                     ; let maybeMoveColor = getMoveColor (getGameState game)
                                     ; if   maybeMoveColor == playerColor
@@ -53,7 +53,7 @@ gameLoop seed playerColor game = do { print game
                                     ; cmd <- getLine
                                     ; if   isNothing maybeMoveColor || parseQuit cmd
                                       then putStrLn "Finishing game process..."
-                                      else do { let newSeed = rnd seed
+                                      else do { let newSeed = nextRnd seed
                                               ; let move = inferMove newSeed game playerColor maybeMoveColor cmd
                                               ; let newGame = makeMove game move
                                               ; if   isGameFinished newGame
@@ -62,7 +62,7 @@ gameLoop seed playerColor game = do { print game
 
 -- | IO function for reading input and getting output.
 --   Main entry point to start the game.
-playChess :: Int ->  IO ()
+playChess :: Integer ->  IO ()
 playChess seed = do { hSetBuffering stdout NoBuffering
                     ; putStr "Select color ('B'/'W' or 'q' to quit): "
                     ; cmd <- getLine

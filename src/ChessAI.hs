@@ -14,15 +14,15 @@ import ChessLib ( Game
                 , boardSize
                 , isMoveAllowed )
 
-aiDecide :: (Int -> Int) -> Int -> Game -> Color -> Move
-aiDecide rnd seed game moveColor = getMove srcCell destCell
+rndDecide :: (Integer -> Integer) -> Integer -> Game -> Color -> Move
+rndDecide rnd seed game moveColor = getMove srcCell destCell
   where pick seed (Board cells) = cells !! (seed `mod` length cells)
         board      = getGameBoard game
         srcCell    = pick rndSrcIdx ourPiecesSubBoard
         destCell   = pick rndDestIdx $ filterBoard ( isMoveAllowed moveColor board .
                                                      getMove srcCell ) board
-        rndSrcIdx  = seed
-        rndDestIdx = rnd seed
+        rndSrcIdx  = (`mod` boardSize board) $ fromIntegral      seed
+        rndDestIdx = (`mod` boardSize board) $ fromIntegral (rnd seed)
         destCoord  = getCellCoordinates destCell
         ourPiecesSubBoard = filterBoard ( \cell -> Just moveColor == (getMaybePieceColor . getCellPiece) cell
                                                 && 0 < (boardSize . canMoveToSubBoard) cell ) board
