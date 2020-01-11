@@ -352,10 +352,10 @@ transformBoard state@(Move color) move@(x,y,x',y') board = if   isMoveAllowed co
 
 -- | Transform game state according to piece move.
 transformState :: Board -> Board -> Move -> State -> State
-transformState oldBoard newBoard move state@(Move color) = if   isMoveAllowed color oldBoard move
-                                                           then -- TODO add checks, checkmates and draws
+transformState oldBoard newBoard move state@(Move color) = if   oldBoard == newBoard
+                                                           then state
+                                                           else -- TODO add checks, checkmates and draws
                                                                 Move (switchColor color)
-                                                           else state
 transformState _        _        _    state              = state
 
 -- | Transform game object according to piece move.
