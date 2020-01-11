@@ -84,6 +84,35 @@ data Game = Game Board State deriving (Eq)
 instance Show Game where
   show (Game board state) = show board ++ "\n" ++ show state
 
+-- Pieces valuation systems.
+-- | Pieces standard valuation function.
+stdValue :: PieceType -> Float
+stdValue Pawn   = 1
+stdValue Knight = 3
+stdValue Bishop = 3
+stdValue Rook   = 5
+stdValue Queen  = 9
+stdValue King   = 10 ^ 10
+
+-- | Crafty pieces valuation function.
+--   (  http://www.craftychess.com/  )
+craftyValue :: PieceType -> Float
+craftyValue Pawn   = 100
+craftyValue Knight = 325
+craftyValue Bishop = 325
+craftyValue Rook   = 500
+craftyValue Queen  = 1050
+craftyValue King   = 40000
+
+-- | Stockfish pieces valuation function.
+stockfishEndGameValue :: PieceType -> Float
+stockfishEndGameValue Pawn   = 1
+stockfishEndGameValue Knight = 4.16
+stockfishEndGameValue Bishop = 4.41
+stockfishEndGameValue Rook   = 6.625
+stockfishEndGameValue Queen  = 12.92
+stockfishEndGameValue King   = 3
+
 -- Black pieces.
 blackPawn, blackRook, blackKnight, blackBishop, blackQueen, blackKing :: Piece
 blackPawn   = Piece Black Pawn
@@ -268,38 +297,33 @@ isGameFinished (Game _ state) = state `elem` [ Draw
 --   Move  is a tuple of four integers (Int,Int,Int,Int)
 isMoveAllowed :: Color -> Board -> Move -> Bool
 isMoveAllowed moveColor board@(Board cells) move@(x,y,x',y') =
-  isJust sourceMaybePiece && moveColor == pieceColor
-                          && l1Dist > 0
-                          && case (moveColor, pieceType) of
+  isJust sourceMaybePiece && moveColor == pieceColor && l1Dist > 0 && case (moveColor, pieceType) of
     (White, Pawn) -> ( if   y  == 6
                        then dx == 0 && 0 > dy && dy > -3
-                       else dx == 0 && 0 > dy && dy > -2
-                  &&   isNothing destMaybePiece && isCleanRoute route )
-                  || ( isJust destMaybePiece && (moveColor /= destPieceColor) && dy == -1 && absDx == 1 )
+                       else dx == 0 && 0 > dy && dy > -2 && isNothing destMaybePiece && isCleanRoute route )
+                  || ( isJust destMaybePiece && moveColor /= destPieceColor && dy == -1 && absDx == 1 )
     (Black, Pawn) -> ( if   y  == 1
                        then dx == 0 && 0 < dy && dy < 3
-                       else dx == 0 && 0 < dy && dy < 2
-                  &&   isNothing destMaybePiece && isCleanRoute route )
-                  || ( isJust destMaybePiece && (moveColor /= destPieceColor) && dy == 1 && absDx == 1 )
-    (_, Rook  )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
-                    && isCleanRoute route && (abs (x - x') == 0 || abs (y - y') == 0)
-    (_, Knight)   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
-                    && l1Dist == 3 && absDx < 3 && absDy < 3
-    (_, Bishop)   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
-                    && isCleanRoute route && absDx == absDy
-    (_, King  )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
-                    && isCleanRoute route && 0 < l1Dist && l1Dist < 3
-    (_, Queen )   -> ( isNothing destMaybePiece || destPieceColor /= moveColor )
-                    && isCleanRoute route && ( absDx == absDy
-                                            || 0 < l1Dist && l1Dist < 3
-                                            || absDx == 0
-                                            || absDy == 0 )
+                       else dx == 0 && 0 < dy && dy < 2 && isNothing destMaybePiece && isCleanRoute route )
+                  || ( isJust destMaybePiece && moveColor /= destPieceColor && dy == 1 && absDx == 1 )
+    (_, Rook  )   -> ( isNothing destMaybePiece
+                    || destPieceColor /= moveColor ) && isCleanRoute route && ( abs (x - x') == 0
+                                                                             || abs (y - y') == 0 )
+    (_, Knight)   -> ( isNothing destMaybePiece
+                    || destPieceColor /= moveColor ) && l1Dist == 3 && absDx < 3 && absDy < 3
+    (_, Bishop)   -> ( isNothing destMaybePiece
+                    || destPieceColor /= moveColor ) && isCleanRoute route && absDx == absDy
+    (_, King  )   -> ( isNothing destMaybePiece
+                    || destPieceColor /= moveColor ) && isCleanRoute route && 0 < l1Dist && l1Dist < 3
+    (_, Queen )   -> ( isNothing destMaybePiece
+                    || destPieceColor /= moveColor ) && isCleanRoute route && ( 0 < l1Dist && l1Dist < 3
+                                                                             || absDx == absDy
+                                                                             || absDx == 0
+                                                                             || absDy == 0 )
     where route            = buildRoute board move
           sourceMaybePiece = getCellPiece  $ getCell board (x, y)
-          pieceType        = getPieceType  $ fromMaybe (error "Could not get piece type of Nothing!")
-                                             sourceMaybePiece
-          pieceColor       = getPieceColor $ fromMaybe (error "Could not get piece color of Nothing!")
-                                             sourceMaybePiece
+          pieceType        = getPieceType  $ fromMaybe (error "Could not get piece type of Nothing!") sourceMaybePiece
+          pieceColor       = getPieceColor $ fromMaybe (error "Could not get piece color of Nothing!") sourceMaybePiece
           destMaybePiece   = getCellPiece  $ getCell board (x',y')
           destPieceColor   = fromMaybe (error "Could not get piece color because cell was empty!")
                                        (getMaybePieceColor destMaybePiece)
@@ -309,26 +333,37 @@ isMoveAllowed moveColor board@(Board cells) move@(x,y,x',y') =
           absDx  = abs dx
           absDy  = abs dy
 
+-- | Transform game board according to piece move.
+transformBoard :: State -> Move -> Board -> Board
+transformBoard  Draw              _                board = board
+transformBoard (Check _)          _                board = board
+transformBoard (CheckMate _)      _                board = board
+transformBoard state@(Move color) move@(x,y,x',y') board = if   isMoveAllowed color board move
+                                                           then setCell (x', y') newDestCell $
+                                                                setCell (x,  y ) newSrcCell board
+                                                           else board
+  where newSrcCell  = emptyCell (getCellCoordinates srcCell)
+                                (getCellColor srcCell)
+        newDestCell = Cell (getCellCoordinates destCell)
+                           (getCellColor destCell)
+                           (getCellPiece srcCell)
+        srcCell  = getCell board (x,  y )
+        destCell = getCell board (x', y')
+
+-- | Transform game state according to piece move.
+transformState :: Board -> Board -> Move -> State -> State
+transformState oldBoard newBoard move state@(Move color) = if   isMoveAllowed color oldBoard move
+                                                           then -- TODO add checks, checkmates and draws
+                                                                Move (switchColor color)
+                                                           else state
+transformState _        _        _    state              = state
+
+-- | Transform game object according to piece move.
+--   Transform board and game state.
 transformGame :: Game -> Move -> Game
-transformGame game@(Game board state) move@(x,y,x',y') = Game (transformBoard board state)
-                                                              (transformState state)
-  where transformState state@(Move color) = if   isMoveAllowed color board move
-                                            then Move (switchColor color) -- TODO add checks, checkmates and draws
-                                            else state
-        transformState state              = state
-        maybePieceColorOnSrcCell = getMaybePieceColor (getCellPiece srcCell)
-        srcCell                  = getCell board (x,  y )
-        destCell                 = getCell board (x', y')
-        transformBoard board state@(Move color) = if   isMoveAllowed color board move
-                                                  then setCell (x', y') newDestCell $
-                                                       setCell (x,  y ) newSrcCell board
-                                                  else board
-                                                  where newSrcCell  = emptyCell (getCellCoordinates srcCell)
-                                                                                (getCellColor srcCell)
-                                                        newDestCell = Cell (getCellCoordinates destCell)
-                                                                           (getCellColor destCell)
-                                                                           (getCellPiece srcCell)
-        transformBoard board _                  = board
+transformGame game@(Game oldBoard state) move@(x,y,x',y') = Game newBoard newState
+  where newBoard = transformBoard state move oldBoard
+        newState = transformState oldBoard newBoard move state
 
 -- | Function that encapsulate all chess moves logic.
 --   Used for whole game state transformation.
