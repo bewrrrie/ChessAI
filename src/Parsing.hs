@@ -1,11 +1,10 @@
 module Parsing where
 
-import ChessLib
-import Data.List (isPrefixOf, elemIndex)
-import Data.Char (toLower)
-import Data.Maybe (fromMaybe)
+import           ChessLib
+import           Data.Char  (toLower)
+import           Data.List  (elemIndex, isPrefixOf)
+import           Data.Maybe (fromMaybe)
 
--- Parsing functions.
 -- | Convert string to color type.
 parseColor :: String -> Maybe Color
 parseColor s
@@ -18,19 +17,20 @@ parseColor s
 --   and second pair of integers are coordinates of square where is the piece
 --   going to be placed after move.
 parseMove :: String -> (Maybe Int, Maybe Int, Maybe Int, Maybe Int)
-parseMove (a:b:c:d:_) = ( elemIndex (toLower a) ['a' .. 'h']
-                        , transformAndCheck b
-                        , elemIndex (toLower c) ['a' .. 'h']
-                        , transformAndCheck d )
-  where errMessage char = "Could not parse coordinate '"
-                          ++ [char] ++ "'!"
-        transformAndCheck char = if   1 <= intCoordinate && intCoordinate <= 8
-                                 then Just (8 - intCoordinate)
-                                 else Nothing
-          where intCoordinate = if    char `elem` ['1'..'8']
-                                then (read::String->Int) [char]
-                                else  -1
-parseMove _           = (Nothing, Nothing, Nothing, Nothing)
+parseMove (a:b:c:d:_) =
+  (elemIndex (toLower a) ['a' .. 'h'], transformAndCheck b, elemIndex (toLower c) ['a' .. 'h'], transformAndCheck d)
+  where
+    errMessage char = "Could not parse coordinate '" ++ [char] ++ "'!"
+    transformAndCheck char =
+      if 1 <= intCoordinate && intCoordinate <= 8
+        then Just (8 - intCoordinate)
+        else Nothing
+      where
+        intCoordinate =
+          if char `elem` ['1' .. '8']
+            then (read :: String -> Int) [char]
+            else -1
+parseMove _ = (Nothing, Nothing, Nothing, Nothing)
 
 -- | Check if command to quit was written correctly.
 parseQuit :: String -> Bool
