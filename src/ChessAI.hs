@@ -11,12 +11,17 @@ rndDecide rnd seed game moveColor = getMove srcCell destCell
     pick seed (Board cells) = cells !! (seed `mod` length cells)
     board = getGameBoard game
     srcCell = pick rndSrcIdx ourPiecesSubBoard
-    destCell = pick rndDestIdx $ filterBoard (isMoveAllowed moveColor board . getMove srcCell) board
+    destCell =
+      pick rndDestIdx $
+      filterBoard (isMoveAllowed moveColor board . getMove srcCell) board
     rndSrcIdx = (`mod` boardSize board) $ fromIntegral seed
     rndDestIdx = (`mod` boardSize board) $ fromIntegral (rnd seed)
     destCoord = getCellCoordinates destCell
     ourPiecesSubBoard =
       filterBoard
-        (\cell -> Just moveColor == (getMaybePieceColor . getCellPiece) cell && 0 < (boardSize . canMoveToSubBoard) cell)
+        (\cell ->
+           Just moveColor == (getMaybePieceColor . getCellPiece) cell &&
+           0 < (boardSize . canMoveToSubBoard) cell)
         board
-    canMoveToSubBoard cell = filterBoard (isMoveAllowed moveColor board . getMove cell) board
+    canMoveToSubBoard cell =
+      filterBoard (isMoveAllowed moveColor board . getMove cell) board

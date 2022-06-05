@@ -18,7 +18,10 @@ parseColor s
 --   going to be placed after move.
 parseMove :: String -> (Maybe Int, Maybe Int, Maybe Int, Maybe Int)
 parseMove (a:b:c:d:_) =
-  (elemIndex (toLower a) ['a' .. 'h'], transformAndCheck b, elemIndex (toLower c) ['a' .. 'h'], transformAndCheck d)
+  ( elemIndex (toLower a) ['a' .. 'h']
+  , transformAndCheck b
+  , elemIndex (toLower c) ['a' .. 'h']
+  , transformAndCheck d)
   where
     errMessage char = "Could not parse coordinate '" ++ [char] ++ "'!"
     transformAndCheck char =
