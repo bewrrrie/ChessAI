@@ -1,6 +1,6 @@
 # ChessAI
 
-My implementation of ASCII chess game with opponent AI.
+My implementation of a console chess game with opponent AI.
 
 ### Current goals
 - [x] Implement chess board and pieces
@@ -10,19 +10,17 @@ My implementation of ASCII chess game with opponent AI.
 - [ ] Implement game history output to file
 - [ ] Implement opponent AI using minimax criteria ([freecodecamp article](https://www.freecodecamp.org/news/simple-chess-ai-step-by-step-1d55a9266977/), [arXiv:1404.1515](https://arxiv.org/abs/1404.1515), [arXiv:1208.1940](https://arxiv.org/abs/1208.1940))
 
-### How to build and execute
-To build this project [Haskell Tool Stack](https://github.com/commercialhaskell/stack) is required.  
-```
-$ cd /path/to/repository/ChessAI
-$ stack build  
-$ stack exec path/to/generated/executable/ChessAI
-```  
-After executing `$ stack build` path to generated executable file will be shown.
+### Requirements
+Tested on Ubuntu 20.04.5 LTS.
+- [Haskell stack](https://docs.haskellstack.org/).
+
+### How to run
+To run the game you can simply run the shell-script `run.sh`.
 
 ### How to play
-First you should choose color that you will be playing for.  
+First you should choose the color of your pieces.  
 `Select color ('B'/'W' or 'q' to quit): `  
-You can type any string starting with `b` or `B` to play for Black pieces or string starting with `w` or `W` to play for White pieces. You can quit the game by typing any string starting with `q` or `Q`. When the pieces color is selected the game board will appear.  
+You can type any string starting with `b` or `B` to play for Black pieces or string starting with `w` or `W` to play for White pieces. You can quit the game by typing any string starting with `q` or `Q`. When the color is selected the game board will appear.
 ```
   A B C D E F G H
  ┏━┯━┯━┯━┯━┯━┯━┯━┓
@@ -46,7 +44,7 @@ You can type any string starting with `b` or `B` to play for Black pieces or str
 
 Move for White.
 ```  
-If you decided to play for White you can choose the way you are going to move your pieces. For example you can type: `e2e4`. This will affect on game board in such way.   
+If you decided to play for White you can choose the way you are going to move your pieces. For example you can type: `e2e4`. This will affect on the game board in the following way.
 ```
   A B C D E F G H
  ┏━┯━┯━┯━┯━┯━┯━┯━┓
@@ -70,7 +68,7 @@ If you decided to play for White you can choose the way you are going to move yo
 
 Move for Black.
 ```  
-Now it says that current move is for Black. Instead of move (`e2e4`) you could type any string starting with `q` or `Q` to quit the game.   
+Now it says that the current move is for Black. Instead of move you could type any string starting with `q` or `Q` to quit the game.   
 
 ### Save game history to file
 To be done soon...
