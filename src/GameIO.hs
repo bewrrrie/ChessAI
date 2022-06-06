@@ -4,7 +4,7 @@ import           Control.Monad
 import           Data.Maybe    (fromMaybe, isNothing)
 import           System.IO
 
-import           ChessAI       (rndDecide)
+import           ChessAI       (decide)
 import           ChessLib      (Color (..), Game, Move, getGameState,
                                 getMoveColor, initialGame, isGameFinished,
                                 makeMove)
@@ -19,7 +19,7 @@ nextRnd seed = (a * seed + c) `mod` m
     m = 64
 
 getAIDecision :: Integer -> Game -> Color -> Move
-getAIDecision = rndDecide nextRnd
+getAIDecision = decide nextRnd
 
 -- | Piece move inference function.
 --   If it is our turn we parse the move from cmd

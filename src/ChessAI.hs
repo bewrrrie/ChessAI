@@ -5,8 +5,8 @@ import           ChessLib (Board (..), CellCoords, Color, Game, Move, boardSize,
                            getGameBoard, getMaybePieceColor, getMove,
                            isMoveAllowed)
 
-rndDecide :: (Integer -> Integer) -> Integer -> Game -> Color -> Move
-rndDecide rnd seed game moveColor = getMove srcCell destCell
+decide :: (Integer -> Integer) -> Integer -> Game -> Color -> Move
+decide rnd seed game moveColor = getMove srcCell destCell
   where
     pick seed (Board cells) = cells !! (seed `mod` length cells)
     board = getGameBoard game
