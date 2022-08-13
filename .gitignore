@@ -5,3 +5,4 @@ out/
 *~
 *.lock
 *.iml
+*.cabal
