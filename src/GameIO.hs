@@ -1,14 +1,12 @@
 module GameIO where
 
-import           Control.Monad
-import           Data.Maybe    (fromMaybe, isNothing)
+import           Data.Maybe (isNothing)
 import           System.IO
 
-import           ChessAI       (decide)
-import           ChessLib      (Color (..), Game, Move, getGameState,
-                                getMoveColor, initialGame, isGameFinished,
-                                makeMove)
-import           Parsing       (parseColor, parseMove, parseQuit)
+import           ChessAI    (decide)
+import           ChessLib   (Color (..), Game, Move, getGameState, getMoveColor,
+                             initialGame, isGameFinished, makeMove)
+import           Parsing    (parseColor, parseMove, parseQuit)
 
 -- | Random seed transformation function.
 nextRnd :: Integer -> Integer

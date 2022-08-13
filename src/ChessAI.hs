@@ -1,14 +1,13 @@
 module ChessAI where
 
-import           ChessLib (Board (..), CellCoords, Color, Game, Move, boardSize,
-                           filterBoard, getCellCoordinates, getCellPiece,
-                           getGameBoard, getMaybePieceColor, getMove,
-                           isMoveAllowed)
+import           ChessLib (Board (..), Color, Game, Move, boardSize,
+                           filterBoard, getCellPiece, getGameBoard,
+                           getMaybePieceColor, getMove, isMoveAllowed)
 
 decide :: (Integer -> Integer) -> Integer -> Game -> Color -> Move
 decide rnd seed game moveColor = getMove srcCell destCell
   where
-    pick seed (Board cells) = cells !! (seed `mod` length cells)
+    pick n (Board cells) = cells !! (n `mod` length cells)
     board = getGameBoard game
     srcCell = pick rndSrcIdx ourPiecesSubBoard
     destCell =
@@ -16,7 +15,6 @@ decide rnd seed game moveColor = getMove srcCell destCell
       filterBoard (isMoveAllowed moveColor board . getMove srcCell) board
     rndSrcIdx = (`mod` boardSize board) $ fromIntegral seed
     rndDestIdx = (`mod` boardSize board) $ fromIntegral (rnd seed)
-    destCoord = getCellCoordinates destCell
     ourPiecesSubBoard =
       filterBoard
         (\cell ->

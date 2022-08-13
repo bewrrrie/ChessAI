@@ -1,9 +1,8 @@
 module Parsing where
 
 import           ChessLib
-import           Data.Char  (toLower)
-import           Data.List  (elemIndex, isPrefixOf)
-import           Data.Maybe (fromMaybe)
+import           Data.Char (toLower)
+import           Data.List (elemIndex)
 
 -- | Convert string to color type.
 parseColor :: String -> Maybe Color
@@ -23,7 +22,6 @@ parseMove (a:b:c:d:_) =
   , elemIndex (toLower c) ['a' .. 'h']
   , transformAndCheck d)
   where
-    errMessage char = "Could not parse coordinate '" ++ [char] ++ "'!"
     transformAndCheck char =
       if 1 <= intCoordinate && intCoordinate <= 8
         then Just (8 - intCoordinate)

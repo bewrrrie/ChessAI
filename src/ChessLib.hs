@@ -68,6 +68,7 @@ instance Show Board where
       showUpperBorder = " ┏" ++ concat (replicate 7 "━┯") ++ "━┓\n"
       showLowerBorder = " ┗" ++ concat (replicate 7 "━┷") ++ "━┛\n"
       showRowsSplitter = " ┠" ++ concat (replicate 7 "─┼") ++ "─┨\n"
+      showCells :: [Cell] -> Integer -> String
       showCells [] _ = ""
       showCells (c:cs) 1 =
         "│" ++
@@ -89,7 +90,6 @@ instance Show Board where
 data State
   = Move Color
   | Check Color
-  | Mate Color
   | Draw
   | CheckMate Color
   deriving (Eq)
@@ -112,13 +112,13 @@ instance Show Game where
 
 -- Pieces valuation systems.
 -- | Pieces standard valuation function.
-stdValue :: PieceType -> Float
+stdValue :: PieceType -> Integer
 stdValue Pawn   = 1
 stdValue Knight = 3
 stdValue Bishop = 3
 stdValue Rook   = 5
 stdValue Queen  = 9
-stdValue King   = 10 ^ 10
+stdValue King   = 1000000000
 
 -- | Crafty pieces valuation function.
 --   (  http://www.craftychess.com/  )
@@ -196,6 +196,7 @@ initialBoard = Board [placePiece (k `mod` 8) (k `div` 8) | k <- [0 .. 63]]
     maybePiece _ _ = Nothing
 
 -- Initial game.
+initialGame :: Game
 initialGame = Game initialBoard (Move White)
 
 -- Piece functions.
@@ -250,14 +251,14 @@ getCell (Board (x:xs)) t =
   if t == getCellCoordinates x
     then x
     else getCell (Board xs) t
-getCell (Board []) t = error "Could not find anything on empty board!"
+getCell (Board []) _ = error "Could not find anything on empty board!"
 
 filterBoard :: (Cell -> Bool) -> Board -> Board
 filterBoard _ (Board []) = Board []
-filterBoard pred (Board (cell:cells)) =
-  if pred cell
-    then appendCell (filterBoard pred (Board cells)) cell
-    else filterBoard pred (Board cells)
+filterBoard p (Board (cell:cells)) =
+  if p cell
+    then appendCell (filterBoard p (Board cells)) cell
+    else filterBoard p (Board cells)
   where
     appendCell (Board cells_) cell_ = Board (cell_ : cells_)
 
@@ -323,10 +324,10 @@ setCell (x, y) cell (Board cells) = Board (replace (x, y) cell cells)
   -- Replace list element function.
   where
     replace :: CellCoords -> Cell -> [Cell] -> [Cell]
-    replace t newElement (x:xs) =
-      if t == getCellCoordinates x
-        then newElement : xs
-        else x : replace t newElement xs
+    replace t newElement (c:cs) =
+      if t == getCellCoordinates c
+        then newElement : cs
+        else c : replace t newElement cs
     replace _ _ [] = error "Could not replace element on empty board!"
 
 isCellNothing :: Cell -> Bool
@@ -351,7 +352,7 @@ isGameFinished (Game _ state) =
 --   This function returns boolean that tells us
 --   if specified move of player of specified color is allowed be done.
 isMoveAllowed :: Color -> Board -> Move -> Bool
-isMoveAllowed moveColor board@(Board cells) move@(x, y, x', y') =
+isMoveAllowed moveColor board move@(x, y, x', y') =
   isJust sourceMaybePiece &&
   moveColor == pieceColor &&
   l1Dist > 0 &&
@@ -411,7 +412,7 @@ transformBoard :: State -> Move -> Board -> Board
 transformBoard Draw _ board = board
 transformBoard (Check _) _ board = board
 transformBoard (CheckMate _) _ board = board
-transformBoard state@(Move color) move@(x, y, x', y') board =
+transformBoard (Move color) move@(x, y, x', y') board =
   if isMoveAllowed color board move
     then setCell (x', y') newDestCell $ setCell (x, y) newSrcCell board
     else board
@@ -426,7 +427,7 @@ transformBoard state@(Move color) move@(x, y, x', y') board =
     destCell = getCell board (x', y')
 
 hasThreatToKing :: Color -> Board -> Bool
-hasThreatToKing color board = False --TODO check if opponent threaten to our king
+hasThreatToKing _ _ = False --TODO check if opponent threaten to our king
 
 hasMove :: Color -> Board -> Bool
 hasMove color board@(Board cells) = or canMoveMatrix
@@ -446,7 +447,7 @@ transformState oldBoard newBoard state =
     then state
     else getNewState newBoard state
   where
-    getNewState board state@(Move color)
+    getNewState board (Move color)
       | canNotMove && kingThreat = CheckMate newColor
       | kingThreat = Check newColor
       | canNotMove = Draw
@@ -455,12 +456,12 @@ transformState oldBoard newBoard state =
         newColor = switchColor color
         kingThreat = hasThreatToKing color board
         canNotMove = not $ hasMove color board
+    getNewState _ s = s -- <-- TODO
 
 -- | Transform game object according to piece move.
 --   Transform board and game state.
 transformGame :: Game -> Move -> Game
-transformGame game@(Game oldBoard state) move@(x, y, x', y') =
-  Game newBoard newState
+transformGame (Game oldBoard state) move = Game newBoard newState
   where
     newBoard = transformBoard state move oldBoard
     newState = transformState oldBoard newBoard state
@@ -468,7 +469,8 @@ transformGame game@(Game oldBoard state) move@(x, y, x', y') =
 -- | Function that encapsulate all chess moves logic.
 --   Used for whole game state transformation.
 makeMove :: Game -> Move -> Game
-makeMove game@(Game board (CheckMate White)) _ = game
-makeMove game@(Game board (CheckMate Black)) _ = game
-makeMove game@(Game board Draw) _              = game
-makeMove game@(Game _ (Move _)) move           = transformGame game move
+makeMove game@(Game _ (CheckMate White)) _ = game
+makeMove game@(Game _ (CheckMate Black)) _ = game
+makeMove game@(Game _ Draw) _              = game
+makeMove game@(Game _ (Check _)) move      = transformGame game move
+makeMove game@(Game _ (Move _)) move       = transformGame game move
